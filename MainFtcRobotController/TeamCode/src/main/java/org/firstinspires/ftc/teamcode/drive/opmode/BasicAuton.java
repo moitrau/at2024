@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 /*
  * This is an example of a more complex path to really test the tuning.
  */
-@Autonomous(group = "drive")
+@Autonomous(name = "BasicAuton")
 public class BasicAuton extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
@@ -25,10 +25,12 @@ public class BasicAuton extends LinearOpMode {
         startPose = new Pose2d(-12, 65, Math.toRadians(-90));
         drive.setPoseEstimate(startPose);
         TrajectorySequence traj = drive.trajectorySequenceBuilder(startPose)
-                .forward(15)
-                .turn(Math.toRadians(90))
-                .forward(55)
-                .turn(Math.toRadians(45))
+                //.forward(16)
+                //.turn(Math.toRadians(90))
+                //.forward(55)
+                //.turn(Math.toRadians(45))
+                //.forward(10)
+                .splineToLinearHeading(new Pose2d(50,55,Math.toRadians(45)),Math.toRadians(90))
                 .build();
 
         drive.followTrajectorySequence(traj);
