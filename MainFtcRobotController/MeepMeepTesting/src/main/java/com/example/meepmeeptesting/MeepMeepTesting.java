@@ -23,7 +23,11 @@ public class MeepMeepTesting {
                         //.forward(55)
                         //.turn(Math.toRadians(45))
                         //.forward(10)
+<<<<<<< Updated upstream
                         .splineToLinearHeading(new Pose2d(50,55,Math.toRadians(45)),Math.toRadians(30))
+=======
+                        .splineToLinearHeading(new Pose2d(50,55,Math.toRadians(45)),Math.toRadians(210))
+>>>>>>> Stashed changes
                         .build());
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTOTHEDEEP_JUICE_DARK)
