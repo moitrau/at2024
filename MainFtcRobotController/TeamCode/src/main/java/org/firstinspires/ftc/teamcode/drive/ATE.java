@@ -24,6 +24,7 @@ public class ATE {
     public enum IntakeWristState {
         BASE,
         INTAKE,
+        PICK_INTAKE,
         OUTTAKE,
         CONSUME
     };
