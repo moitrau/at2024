@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.ATC;
 import org.firstinspires.ftc.teamcode.drive.ATE;
+import org.firstinspires.ftc.teamcode.drive.ATRoboTimer;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 /**
@@ -24,7 +25,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
  * exercise is to ascertain whether the localizer has been configured properly (note: the pure
  * encoder localizer heading may be significantly off if the track width has not been tuned).
  */
-@TeleOp(name="BasicTeleop2")
+@TeleOp(name="BasicTeleop3")
 public class BasicTeleop extends LinearOpMode {
 
 
@@ -55,7 +56,8 @@ public class BasicTeleop extends LinearOpMode {
     private TouchSensor vtSensor;
     private TouchSensor htSensor;
 
-    double clawCatchPose = ATC.clawCatchPose;
+    double clawCatchTightPose = ATC.clawCatchTightPose;
+    double clawCatchLoosePose = ATC.clawCatchLoosePose;
     double clawReleasePose = ATC.clawReleasePose;
 
     double clawWristBasePose = ATC.clawWristBasePose;
@@ -93,7 +95,13 @@ public class BasicTeleop extends LinearOpMode {
     private double intakeWristTimer = 0;
     private double hSliderTimer = 0;
     private double vSliderTimer = 0;
-    private double outtakeTimer = 0;
+
+    ATRoboTimer consumeTimer = new ATRoboTimer();
+    ATRoboTimer clawTimer = new ATRoboTimer();
+    ATRoboTimer grabTimer = new ATRoboTimer();
+    ATRoboTimer pickTimer = new ATRoboTimer();
+    ATRoboTimer dropTimer = new ATRoboTimer();
+    ATRoboTimer outtakeTimer = new ATRoboTimer();
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -124,9 +132,9 @@ public class BasicTeleop extends LinearOpMode {
 //Set Drive Mode
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 //Initialize Poses
-        claw.setPosition(clawCatchPose);
+        claw.setPosition(clawCatchTightPose);
         clawArm.setPosition(clawArmBasePose);
-        clawWrist.setPosition(clawArmBasePose);
+        clawWrist.setPosition(clawWristBasePose);
         intakeLW.setPosition(intakeWheelHaltPose);
         intakeRW.setPosition(intakeWheelHaltPose);
         intakeWrist.setPosition(intakeWristBasePose);
@@ -166,10 +174,21 @@ public class BasicTeleop extends LinearOpMode {
         while (!isStopRequested()) {
 
             if(htSensor.isPressed()){
-                hSliderState = ATE.HorizontalSliderState.BASE;
+
                 if(intakeWristState == ATE.IntakeWristState.BASE) {
                     intakeWristState = ATE.IntakeWristState.CONSUME;
+                    intakeWrist.setPosition(ATC.intakeWristConsumePose);
+                    hSlider.setPower(0);
                 }
+                /* Below lines are to automate activation of grab,catch,pick*/
+                if(hSliderState == ATE.HorizontalSliderState.EXTENDED && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
+
+                    clawArmState = ATE.ClawArmState.PICK_INTAKE;
+                    clawWristState = ATE.ClawWristState.PICK_INTAKE;
+                    intakeWristState = ATE.IntakeWristState.PICK_INTAKE;
+                    consumeTimer.startTimer();
+                }
+                hSliderState = ATE.HorizontalSliderState.BASE;
                 hSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 hSlider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             }
@@ -177,7 +196,7 @@ public class BasicTeleop extends LinearOpMode {
             if (gamepad2.dpad_left && hSliderState != ATE.HorizontalSliderState.BASE) {
                 intakeWrist.setPosition(ATC.intakeWristBasePose);
                 hSlider.setPower(-0.5);
-            }else if(gamepad2.dpad_right){
+            }else if(gamepad1.right_bumper || gamepad2.dpad_right){
                 hSliderState = ATE.HorizontalSliderState.EXTENDED;
                 intakeWristState = ATE.IntakeWristState.BASE;
                 intakeWrist.setPosition(ATC.intakeWristBasePose);
@@ -197,7 +216,7 @@ public class BasicTeleop extends LinearOpMode {
                 vSliderState = ATE.VerticalSliderState.BASE;
                 vSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             }
-            if(gamepad2.left_bumper && gamepad2.dpad_up && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
+            if((gamepad1.a || gamepad2.left_bumper && gamepad2.dpad_up) && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
                 setSlider(vSlider,vSliderBaskHighPose,vSliderVelocity);
                 vSliderState = ATE.VerticalSliderState.EXTENDED;
             }
@@ -225,14 +244,14 @@ public class BasicTeleop extends LinearOpMode {
             }*/
 
 //Intake-Outtake code for sample starts
-            if ((gamepad2.left_bumper && gamepad2.y) || sampleSensorState == ATE.SampleSensorState.RED) {
+            if (gamepad1.y || (gamepad2.left_bumper && gamepad2.y) || sampleSensorState == ATE.SampleSensorState.RED) {
                 intakeLW.setDirection(Servo.Direction.FORWARD);
                 intakeRW.setDirection(Servo.Direction.REVERSE);
                 intakeLW.setPosition(0.9);
                 intakeRW.setPosition(0.9);
                 sampleSensorState = getSampleSensorState();
                 intakeWrist.setPosition(ATC.intakeWristOuttakePose);
-            }else if ((gamepad2.left_bumper && gamepad2.x) && sampleSensorState == ATE.SampleSensorState.NONE && hSliderState == ATE.HorizontalSliderState.EXTENDED) {
+            }else if (gamepad1.x || (gamepad2.left_bumper && gamepad2.x) && sampleSensorState == ATE.SampleSensorState.NONE && hSliderState == ATE.HorizontalSliderState.EXTENDED) {
                 intakeLW.setDirection(Servo.Direction.REVERSE);
                 intakeRW.setDirection(Servo.Direction.FORWARD);
                 intakeLW.setPosition(0.9);
@@ -240,7 +259,7 @@ public class BasicTeleop extends LinearOpMode {
                 intakeWrist.setPosition(ATC.intakeWristIntakePose);
                 hSlider.setPower(0.5);
             }else if ((sampleSensorState == ATE.SampleSensorState.YELLOW || sampleSensorState == ATE.SampleSensorState.BLUE ) && hSliderState == ATE.HorizontalSliderState.EXTENDED){
-                hSlider.setPower(-0.5);
+                hSlider.setPower(-0.9);
                 intakeLW.setPosition(0.5);
                 intakeRW.setPosition(0.5);
                 intakeWrist.setPosition(ATC.intakeWristBasePose);
@@ -254,10 +273,54 @@ public class BasicTeleop extends LinearOpMode {
             if(sampleSensorState == ATE.SampleSensorState.NONE) {
                 sampleSensorState = getSampleSensorState();
             }
+            if(gamepad2.a && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
+                clawArmState = ATE.ClawArmState.PICK_INTAKE;
+                clawWristState = ATE.ClawWristState.PICK_INTAKE;
+                intakeWristState = ATE.IntakeWristState.PICK_INTAKE;
+                consumeTimer.startTimer();
+
+            }
+            if(clawArmState == ATE.ClawArmState.PICK_INTAKE && clawWristState == ATE.ClawWristState.PICK_INTAKE && intakeWristState == ATE.IntakeWristState.PICK_INTAKE ) {
+                if(consumeTimer.isActive) {
+                    intakeWrist.setPosition(ATC.intakeWristConsumePose);
+                    if (consumeTimer.elapsedTime() >= ATC.consumeMaxTime){
+                        consumeTimer.stopTimer();
+                        grabTimer.startTimer();
+                    }
+                }
+                if(grabTimer.isActive) {
+                    clawWrist.setPosition(clawWristBasePose);
+                    clawArm.setPosition(clawArmIntakePose);
+                    claw.setPosition(clawReleasePose);
+                    intakeWrist.setPosition(ATC.intakeWristPickIntakePose);
+                    if (grabTimer.elapsedTime() >= ATC.grabMaxTime){
+                        grabTimer.stopTimer();
+                        clawTimer.startTimer();
+                    }
+                }
+                if (clawTimer.isActive) {
+                    clawWrist.setPosition(clawWristIntakePose);
+                    claw.setPosition(clawCatchLoosePose);
+                    if (clawTimer.elapsedTime() >= ATC.clawMaxTime){
+                        clawTimer.stopTimer();
+                        pickTimer.startTimer();
+                    }
+                }
+                if(pickTimer.isActive){
+                    clawArm.setPosition(clawArmBasePose);
+                    if (pickTimer.elapsedTime() >= ATC.pickMaxTime){
+                        clawWrist.setPosition(clawWristIntakePose);
+                        pickTimer.stopTimer();
+                        clawArmState = ATE.ClawArmState.BASE;
+                        clawWristState = ATE.ClawWristState.BASE;
+                    }
+                }
+            }
+/* Commenting to test synchronous move through timers
 
             if(gamepad2.a && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
                 intakeWrist.setPosition(ATC.intakeWristPickIntakePose);
-                clawWrist.setPosition(clawWristIntakePose);
+                //clawWrist.setPosition(clawWristIntakePose);
                 clawArm.setPosition(clawArmIntakePose);
                 claw.setPosition(clawReleasePose);
                 clawArmState = ATE.ClawArmState.PICK_INTAKE;
@@ -266,19 +329,55 @@ public class BasicTeleop extends LinearOpMode {
             }
 
             if(gamepad2.b && clawWristState == ATE.ClawWristState.PICK_INTAKE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
-                claw.setPosition(clawReleasePose);
+
+                clawWrist.setPosition(clawWristIntakePose);
+                claw.setPosition(clawCatchLoosePose);
+
                 clawArm.setPosition(clawArmBasePose);
-                clawWrist.setPosition(clawWristBasePose);
-                claw.setPosition(clawCatchPose);
+                //clawWrist.setPosition(clawWristBasePose);
+
                 clawArmState = ATE.ClawArmState.BASE;
                 clawWristState = ATE.ClawWristState.BASE;
             }
+
+*/
 //Intake-Outtake code for sample ends
 
 
 
 //Sample code starts
 
+            if((gamepad1.b || gamepad2.left_bumper && gamepad2.b) && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.EXTENDED && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
+                clawWristState = ATE.ClawWristState.DROP;
+                clawArmState = ATE.ClawArmState.DROP;
+                sampleSensorState = ATE.SampleSensorState.NONE;
+                dropTimer.startTimer();
+            }
+            if (clawWristState == ATE.ClawWristState.DROP && clawArmState == ATE.ClawArmState.DROP && sampleSensorState == ATE.SampleSensorState.NONE){
+                if(dropTimer.isActive){
+                    clawArm.setPosition(clawArmDropPose);
+                    clawWrist.setPosition(clawWristDropPose);
+                    if (dropTimer.elapsedTime() >= ATC.dropMaxTime){
+                        dropTimer.stopTimer();
+                        clawTimer.startTimer();
+                    }
+                }
+                if(clawTimer.isActive){
+                    claw.setPosition(clawReleasePose);
+                    if (clawTimer.elapsedTime() >= ATC.clawMaxTime){
+                        clawTimer.stopTimer();
+                        clawArm.setPosition(clawArmBasePose);
+                        clawWrist.setPosition(clawWristBasePose);
+                        claw.setPosition(clawCatchTightPose);
+                        clawWristState = ATE.ClawWristState.BASE;
+                        clawArmState = ATE.ClawArmState.BASE;
+                        setSlider(vSlider,vSliderBasePose,vSliderVelocity);
+                        vSliderState = ATE.VerticalSliderState.BASE;
+                    }
+                }
+
+            }
+/* Commenting code to test synchronous moves
             if(gamepad2.left_bumper && gamepad2.b && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.EXTENDED && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
                 clawArm.setPosition(clawArmDropPose);
                 clawWrist.setPosition(clawWristDropPose);
@@ -291,12 +390,12 @@ public class BasicTeleop extends LinearOpMode {
             if(gamepad2.left_bumper && gamepad2.a && clawWristState == ATE.ClawWristState.DROP && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.EXTENDED && sampleSensorState ==ATE.SampleSensorState.NONE ){
                 clawArm.setPosition(clawArmBasePose);
                 clawWrist.setPosition(clawWristBasePose);
-                claw.setPosition(clawCatchPose);
+                claw.setPosition(clawCatchTightPose);
                 clawWristState = ATE.ClawWristState.BASE;
                 clawArmState = ATE.ClawArmState.BASE;
             }
 
-
+*/
 
 //Sample code ends
 /*
@@ -311,7 +410,7 @@ public class BasicTeleop extends LinearOpMode {
             }
 
             if(gamepad2.right_bumper && gamepad2.y && clawWristState == ATE.ClawWristState.PICK_WALL && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE && sampleSensorState == ATE.SampleSensorState.NONE ){
-                claw.setPosition(clawCatchPose);
+                claw.setPosition(clawCatchTightPose);
                 clawArm.setPosition(clawArmBasePose);
                 clawWrist.setPosition(clawWristBasePose);
                 clawWristState = ATE.ClawWristState.BASE;
@@ -327,7 +426,7 @@ public class BasicTeleop extends LinearOpMode {
                 claw.setPosition(clawReleasePose);
                 clawWrist.setPosition(clawWristBasePose);
                 clawArm.setPosition(clawArmBasePose);
-                claw.setPosition(clawCatchPose);
+                claw.setPosition(clawCatchTightPose);
                 clawWristState = ATE.ClawWristState.BASE;
             }
 //Specimen code ends
@@ -346,6 +445,10 @@ public class BasicTeleop extends LinearOpMode {
             telemetry.addData("clawArm pos", clawArm.getPosition());
             telemetry.addData("clawWrist pos", clawWrist.getPosition());
             telemetry.addData("intakeWrist pos", intakeWrist.getPosition());
+            telemetry.addData("consumeTimer:",consumeTimer.elapsedTime());
+            telemetry.addData("grabTimer:",grabTimer.elapsedTime());
+            telemetry.addData("clawTimer:",clawTimer.elapsedTime());
+            telemetry.addData("pickTimer:",pickTimer.elapsedTime());
 
             telemetry.update();
  ///////Drive Code////////////
