@@ -11,15 +11,15 @@ public class ATC {
 
     public static final double clawWristBasePose = 0.60;
     public static final double clawWristIntakePose = 0.65;
-    public static final double clawWristHangPose = 0.23;
+    public static final double clawWristHangPose = 0.0;
     public static final double clawWristDropPose = 0.23;
-    public static final double clawWristWallPose = 0;
+    public static final double clawWristWallPose = 0.20;
 
-    public static final double clawArmBasePose = 0.38;
+    public static final double clawArmBasePose = 0.41;
     public static final double clawArmIntakePose = 0.70;
-    public static final double clawArmHangPose = 0.33;
+    public static final double clawArmHangPose = 0.0;
     public static final double clawArmDropPose = 0.33;
-    public static final double clawArmWallPose = 0.18;
+    public static final double clawArmWallPose = 0.25;
 
     public static final double intakeWristBasePose = 0.45;
     public static final double intakeWristPickIntakePose = 0.5;
@@ -32,8 +32,8 @@ public class ATC {
 
 
     public static final int vSliderBasePose = 0;
-    public static final int vSliderSubmHighPose = 200;
-    public static final int vSliderSubmLowPose = 100;
+    public static final int vSliderSubmHighPose = 1750;
+    public static final int vSliderSubmLowPose = 1200;
     public static final int vSliderBaskHighPose = 4000;
     public static final int vSliderBaskLowPose = 100;
     public static final int vSliderVelocity=10000;
