@@ -33,6 +33,7 @@ public class ATC {
 
     public static final int vSliderBasePose = 0;
     public static final int vSliderSubmHighPose = 1750;
+    public static final int vSliderSubmMidPose = 1400;
     public static final int vSliderSubmLowPose = 900;
     //public static final int vSliderBaskHighPose = 4000;
     public static final int vSliderBaskHighPose = 1750;
