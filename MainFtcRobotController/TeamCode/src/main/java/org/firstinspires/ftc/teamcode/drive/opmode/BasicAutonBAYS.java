@@ -24,13 +24,7 @@ public class BasicAutonBAYS extends LinearOpMode {
         startPose = new Pose2d(9, 64, Math.toRadians(90));
         drive.setPoseEstimate(startPose);
         TrajectorySequence traj = drive.trajectorySequenceBuilder(startPose)
-                //.forward(16)
-                //.turn(Math.toRadians(90))
-                //.forward(55)
-                //.turn(Math.toRadians(45))
-                //.forward(10)
-                //.splineToLinearHeading(new Pose2d(50,55,Math.toRadians(45)),Math.toRadians(90))
-                .lineToLinearHeading(new Pose2d(9,36,Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(9,37,Math.toRadians(90)))
                 .lineToLinearHeading(new Pose2d(37,37,Math.toRadians(-45)))
                 .lineToLinearHeading(new Pose2d(54,54,Math.toRadians(-135)))
                 .lineToLinearHeading(new Pose2d(58,40,Math.toRadians(-90)))
@@ -44,7 +38,7 @@ public class BasicAutonBAYS extends LinearOpMode {
 
         drive.followTrajectorySequence(traj);
 
-
-
     }
+
 }
+

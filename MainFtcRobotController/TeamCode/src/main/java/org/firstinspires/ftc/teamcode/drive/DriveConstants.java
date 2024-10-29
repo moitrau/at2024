@@ -46,7 +46,7 @@ public class DriveConstants {
      */
     public static double WHEEL_RADIUS = 1.88976; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 16.34; // in
+    public static double TRACK_WIDTH = 15.5; // in
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using
      * the built-in velocity PID, *these values are fine as is*. However, if you do not have drive
@@ -56,9 +56,9 @@ public class DriveConstants {
     //public static double kV = 1.0 / rpmToVelocity(MAX_RPM);
     //public static double kA = 0;
     //public static double kStatic = 0;
-    public static double kV = 0.0161; // / rpmToVelocity(MAX_RPM);
-    public static double kA = 0.002;
-    public static double kStatic = 0.0689;
+    public static double kV = 0.0164; // / rpmToVelocity(MAX_RPM);
+    public static double kA = 0.0022;
+    public static double kStatic = 0.072;
 
 
     /*
@@ -75,15 +75,15 @@ public class DriveConstants {
     */
     public static double MAX_VEL = 35.06122240511552;
     public static double MAX_ACCEL = 35.48180821614297;
-    public static double MAX_ANG_VEL = Math.toRadians(184.02607784577722);
-    public static double MAX_ANG_ACCEL = Math.toRadians(184.02607784577722);
+    public static double MAX_ANG_VEL = 3.3665;//Math.toRadians(184.02607784577722);
+    public static double MAX_ANG_ACCEL = 3.3665;//Math.toRadians(184.02607784577722);
     /*
      * Adjust the orientations here to match your robot. See the FTC SDK documentation for details.
      */
     public static RevHubOrientationOnRobot.LogoFacingDirection LOGO_FACING_DIR =
-            RevHubOrientationOnRobot.LogoFacingDirection.UP;
+            RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
     public static RevHubOrientationOnRobot.UsbFacingDirection USB_FACING_DIR =
-            RevHubOrientationOnRobot.UsbFacingDirection.RIGHT;
+            RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
 
 
     public static double encoderTicksToInches(double ticks) {
