@@ -197,12 +197,12 @@ public class BasicTeleop extends LinearOpMode {
 
             if (gamepad1.dpad_left && hSliderState != ATE.HorizontalSliderState.BASE) {
                 intakeWrist.setPosition(ATC.intakeWristBasePose);
-                hSlider.setPower(-0.5);
+                hSlider.setPower(-0.7);
             }else if(gamepad1.dpad_right && hSlider.getCurrentPosition()<=ATC.hSliderMaxPose){
                 hSliderState = ATE.HorizontalSliderState.EXTENDED;
                 intakeWristState = ATE.IntakeWristState.BASE;
                 intakeWrist.setPosition(ATC.intakeWristBasePose);
-                hSlider.setPower(0.5);
+                hSlider.setPower(0.7);
             }else{
                 intakeWrist.setPosition(ATC.intakeWristBasePose);
                 hSlider.setPower(0);
@@ -218,7 +218,7 @@ public class BasicTeleop extends LinearOpMode {
             }*/
 
             if(vtSensor.isPressed()){
-                if(vSliderState == ATE.VerticalSliderState.EXTENDED) {
+                if(vSliderState == ATE.VerticalSliderState.EXTENDED || vSliderState == ATE.VerticalSliderState.SUBM_HIGH || vSliderState == ATE.VerticalSliderState.SUBM_LOW ) {
                     vSliderState = ATE.VerticalSliderState.BASE;
                     vSlider.setPower(0);
                     vSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -227,14 +227,14 @@ public class BasicTeleop extends LinearOpMode {
 
 
 //Intake-Outtake code for sample starts
-            if ( ((gamepad1.y && hSlider.getCurrentPosition() >= 650) || sampleSensorState == ATE.SampleSensorState.RED) && hSliderState == ATE.HorizontalSliderState.EXTENDED ) {
+            if ( ((gamepad1.y && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) || sampleSensorState == ATE.SampleSensorState.RED) && hSliderState == ATE.HorizontalSliderState.EXTENDED ) {
                 intakeLW.setDirection(Servo.Direction.FORWARD);
                 intakeRW.setDirection(Servo.Direction.REVERSE);
                 intakeLW.setPosition(0.9);
                 intakeRW.setPosition(0.9);
                 sampleSensorState = getSampleSensorState();
                 intakeWrist.setPosition(ATC.intakeWristOuttakePose);
-            }else if ((gamepad1.x && hSlider.getCurrentPosition() >= 650) && sampleSensorState == ATE.SampleSensorState.NONE && hSliderState == ATE.HorizontalSliderState.EXTENDED) {
+            }else if ((gamepad1.x && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) && sampleSensorState == ATE.SampleSensorState.NONE && hSliderState == ATE.HorizontalSliderState.EXTENDED) {
                 intakeLW.setDirection(Servo.Direction.REVERSE);
                 intakeRW.setDirection(Servo.Direction.FORWARD);
                 intakeLW.setPosition(0.9);
@@ -299,11 +299,15 @@ public class BasicTeleop extends LinearOpMode {
 
 
 //Basket Drop Code Starts
-            if( gamepad2.x && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
+            if( gamepad2.dpad_up && gamepad2.x && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
                 setSlider(vSlider,vSliderBaskHighPose,vSliderVelocity);
                 vSliderState = ATE.VerticalSliderState.EXTENDED;
             }
-            if( gamepad2.y && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.EXTENDED && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
+            if( gamepad2.dpad_down && gamepad2.x && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
+                setSlider(vSlider,vSliderBaskLowPose,vSliderVelocity);
+                vSliderState = ATE.VerticalSliderState.EXTENDED;
+            }
+            if( gamepad2.y && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
                 clawWristState = ATE.ClawWristState.DROP;
                 clawArmState = ATE.ClawArmState.DROP;
                 sampleSensorState = ATE.SampleSensorState.NONE;
@@ -325,6 +329,7 @@ public class BasicTeleop extends LinearOpMode {
                         clawArm.setPosition(clawArmBasePose);
                         clawWrist.setPosition(clawWristBasePose);
                         claw.setPosition(clawCatchTightPose);
+                        sleep(500);
                         clawWristState = ATE.ClawWristState.BASE;
                         clawArmState = ATE.ClawArmState.BASE;
                         vSlider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -342,6 +347,7 @@ public class BasicTeleop extends LinearOpMode {
             if(gamepad1.a && sampleSensorState == ATE.SampleSensorState.NONE && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
                 clawArm.setPosition(clawArmWallPose);
                 clawWrist.setPosition(clawWristWallPose);
+                sleep(250);
                 claw.setPosition(clawReleasePose);
                 clawWristState = ATE.ClawWristState.PICK_WALL;
             }
@@ -349,9 +355,8 @@ public class BasicTeleop extends LinearOpMode {
                 claw.setPosition(clawCatchTightPose);
                 sleep(200);
                 clawWrist.setPosition(clawWristDropPose);
-                sleep(500);
                 //clawArm.setPosition(clawArmDropPose);
-                setSlider(vSlider,500,vSliderVelocity);
+                setSlider(vSlider,ATC.vSliderWallLiftPose,vSliderVelocity);
                 clawWristState = ATE.ClawWristState.BASE;
             }
 
@@ -377,9 +382,7 @@ public class BasicTeleop extends LinearOpMode {
                 Trajectory traj = drive.trajectoryBuilder(new Pose2d())
                         .back(2)
                         .build();
-
                 sleep(5000);
-
                 claw.setPosition(clawReleasePose);
                 //clawArm.setPosition(clawArmBasePose);
                 //clawWrist.setPosition(clawWristBasePose);
@@ -388,7 +391,6 @@ public class BasicTeleop extends LinearOpMode {
                 vSlider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 telemetry.update();
                 vSliderState = ATE.VerticalSliderState.EXTENDED;
-
                 vSlider.setPower(-1);
             }
 
@@ -492,13 +494,18 @@ public class BasicTeleop extends LinearOpMode {
                 hSliderState = ATE.HorizontalSliderState.BASE;
                 vSliderState = ATE.VerticalSliderState.BASE;
                 sampleSensorState = ATE.SampleSensorState.NONE;
+                clawWrist.setPosition(clawWristDropPose);
+                clawArm.setPosition(clawArmDropPose);
+                sleep(500);
+                claw.setPosition(clawReleasePose);
+                sleep(500);
                 claw.setPosition(clawCatchTightPose);
                 clawArm.setPosition(clawArmBasePose);
                 clawWrist.setPosition(clawWristBasePose);
                 intakeLW.setPosition(intakeWheelHaltPose);
                 intakeRW.setPosition(intakeWheelHaltPose);
                 intakeWrist.setPosition(intakeWristBasePose);
-                sleep(500);
+
 
                 vSliderTimer = resetTimer();
                 vSliderTimer = startTimer();
@@ -521,11 +528,10 @@ public class BasicTeleop extends LinearOpMode {
                     intakeWristState = ATE.IntakeWristState.CONSUME;
                     hSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     hSlider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    hSlider.setPower(1);
+                    hSlider.setPower(-1);
                 }
                 hSlider.setPower(0);
                 hSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                hSlider.setDirection(DcMotor.Direction.REVERSE);
                 hSlider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
             }
