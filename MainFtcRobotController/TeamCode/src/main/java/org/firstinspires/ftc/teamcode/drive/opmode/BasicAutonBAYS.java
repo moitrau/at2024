@@ -34,31 +34,11 @@ public class BasicAutonBAYS extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(54,54,Math.toRadians(-135)))
                 .lineToLinearHeading(new Pose2d(27,12,Math.toRadians(0)))
                 .splineToLinearHeading(new Pose2d(32,12,Math.toRadians(-0)),Math.toRadians(-160))
-                //.back(10)
-                //.turn(Math.toRadians(90))
-                //.back(48)
-                //.turn(Math.toRadians(45))
-                //.turn(Math.toRadians(90))
-                //.forward(55)
-                //.turn(Math.toRadians(45))
-                //.forward(10)
-                //.splineToLinearHeading(new Pose2d(50,55,Math.toRadians(45)),Math.toRadians(90))
-                //.setReversed(true)
-                //.splineToLinearHeading(new Pose2d(54,54,Math.toRadians(-135)),Math.toRadians(90))
-                //.setReversed(false)
-                //.splineToLinearHeading(new Pose2d(50,46,Math.toRadians(-90)),Math.toRadians(90))
-                //.setReversed(true)
-                //.splineToLinearHeading(new Pose2d(54,54,Math.toRadians(-135)),Math.toRadians(90))
-                //.setReversed(false)
-                //.splineToLinearHeading(new Pose2d(58,46,Math.toRadians(-90)),Math.toRadians(160))
-                //.splineToLinearHeading(new Pose2d(54,54,Math.toRadians(-135)),Math.toRadians(90))
-                //.splineToLinearHeading(new Pose2d(32,12,Math.toRadians(-145)),Math.toRadians(180))
-
                 .build();
 
         drive.followTrajectorySequence(traj);
 
-
-
     }
+
 }
+
