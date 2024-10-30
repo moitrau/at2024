@@ -266,10 +266,11 @@ public class BasicTeleop extends LinearOpMode {
                     }
                 }
                 if(grabTimer.isActive) {
+                    intakeWrist.setPosition(ATC.intakeWristPickIntakePose);
                     clawWrist.setPosition(clawWristBasePose);
                     clawArm.setPosition(clawArmIntakePose);
                     claw.setPosition(clawReleasePose);
-                    intakeWrist.setPosition(ATC.intakeWristPickIntakePose);
+
                     if (grabTimer.elapsedTime() >= ATC.grabMaxTime){
                         grabTimer.stopTimer();
                         clawTimer.startTimer();

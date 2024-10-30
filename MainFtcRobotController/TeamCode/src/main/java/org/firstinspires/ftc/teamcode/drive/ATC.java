@@ -21,11 +21,11 @@ public class ATC {
     public static final double clawArmDropPose = 0.33;
     public static final double clawArmWallPose = 0.25;
 
-    public static final double intakeWristBasePose = 0.50;
-    public static final double intakeWristPickIntakePose = 0.55;
-    public static final double intakeWristConsumePose = 0.65;
-    public static final double intakeWristOuttakePose = 0.37;
-    public static final double intakeWristIntakePose = 0.33;
+    public static final double intakeWristBasePose = 0.53;
+    public static final double intakeWristPickIntakePose = 0.57;
+    public static final double intakeWristConsumePose = 0.67;
+    public static final double intakeWristOuttakePose = 0.39;
+    public static final double intakeWristIntakePose = 0.35;
 
     public static final double intakeWheelHaltPose = 0.5;
     public static final double intakeWristRunPose = 0.9;
@@ -47,8 +47,8 @@ public class ATC {
     public static final int hSliderVelocity=10000;
 
     public static final double intakeWristMaxTime = 1.0;
-    public static final double hSliderMaxTime = 3.0;
-    public static final double vSliderMaxTime = 3.0;
+    public static final double hSliderMaxTime = 10.0;
+    public static final double vSliderMaxTime = 10.0;
     public static final double consumeMaxTime = 0.5;
     public static final double grabMaxTime = 0.5;
     public static final double clawMaxTime = 0.5;
