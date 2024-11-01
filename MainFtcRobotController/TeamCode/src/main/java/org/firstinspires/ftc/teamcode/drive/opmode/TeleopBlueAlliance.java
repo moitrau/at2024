@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -29,9 +27,9 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
  * exercise is to ascertain whether the localizer has been configured properly (note: the pure
  * encoder localizer heading may be significantly off if the track width has not been tuned).
  */
-@Disabled
-@TeleOp(name="BasicTeleop3")
-public class BasicTeleop extends LinearOpMode {
+
+@TeleOp(name="01_TeleopBlueAlliance")
+public class TeleopBlueAlliance extends LinearOpMode {
 
 
     ATE.ClawState clawState = ATE.ClawState.CATCH;

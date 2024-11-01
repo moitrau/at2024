@@ -6,7 +6,7 @@ Constants used by AT24 - Into The Deep
 public class ATC {
 
     public static final double clawCatchTightPose = 0.8;
-    public static final double clawCatchLoosePose = 0.67;
+    public static final double clawCatchLoosePose = 0.7;
     public static final double clawReleasePose = 0.4;
 
     public static final double clawWristBasePose = 0.60;
@@ -17,7 +17,7 @@ public class ATC {
 
     public static final double clawArmBasePose = 0.41;
     public static final double clawArmIntakePose = 0.70;
-    public static final double clawArmHangPose = 0.38;
+    public static final double clawArmHangPose = 0.33;
     public static final double clawArmDropPose = 0.33;
     public static final double clawArmWallPose = 0.25;
 
@@ -34,7 +34,7 @@ public class ATC {
     public static final int vSliderBasePose = 0;
     public static final int vSliderWallLiftPose = 500;
     public static final int vSliderSubmHighPose = 1750;
-    public static final int vSliderSubmMidPose = 1400;
+    public static final int vSliderSubmMidPose = 1150;
     public static final int vSliderSubmLowPose = 900;
     public static final int vSliderBaskHighPose = 4000;
     //public static final int vSliderBaskHighPose = 1750;
@@ -43,7 +43,7 @@ public class ATC {
 
     public static final int hSliderBasePose = 0;
     public static final int hSliderMinPose = 600;
-    public static final int hSliderMaxPose = 1620;
+    public static final int hSliderMaxPose = 2000;
     public static final int hSliderVelocity=10000;
 
     public static final double intakeWristMaxTime = 1.0;

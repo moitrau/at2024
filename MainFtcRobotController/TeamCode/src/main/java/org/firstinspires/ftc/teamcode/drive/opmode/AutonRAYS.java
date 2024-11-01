@@ -1,11 +1,8 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -19,14 +16,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.ATC;
 import org.firstinspires.ftc.teamcode.drive.ATE;
 import org.firstinspires.ftc.teamcode.drive.ATRoboTimer;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 /*
  * This is an example of a more complex path to really test the tuning.
  */
-@Autonomous(name = "01_BasicAutonBlueAllianceYellowSample")
-public class BasicAutonBAYS extends LinearOpMode {
+@Autonomous(name = "03_AutonRedAllianceYellowSample")
+public class AutonRAYS extends LinearOpMode {
 
 
     ATE.ClawState clawState = ATE.ClawState.CATCH;
@@ -149,7 +147,7 @@ public class BasicAutonBAYS extends LinearOpMode {
 
 
         Pose2d startPose;
-        startPose = new Pose2d(9, 64, Math.toRadians(90));
+        startPose = new Pose2d(-32.5, -64, Math.toRadians(-90));
         drive.setPoseEstimate(startPose);
         /*
         TrajectorySequence traj = drive.trajectorySequenceBuilder(startPose)
@@ -167,7 +165,7 @@ public class BasicAutonBAYS extends LinearOpMode {
 
 //Drop First Yellow Start
         TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(startPose).setReversed(true)
-                .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(-135)), Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(-56, -56, Math.toRadians(45)), Math.toRadians(-90))
                 .addDisplacementMarker(1, () -> {
                     setSlider(vSlider, vSliderBaskHighPose, vSliderVelocity);
                 })
@@ -176,7 +174,7 @@ public class BasicAutonBAYS extends LinearOpMode {
 
 
 
-        while ((vSliderBaskHighPose - vSlider.getCurrentPosition()) < 10) {
+        while ((vSliderBaskHighPose - vSlider.getCurrentPosition()) < 100) {
             telemetry.addData("Drop First Yellow vSlider Current Position", vSlider.getCurrentPosition());
             telemetry.update();
         }
@@ -184,14 +182,10 @@ public class BasicAutonBAYS extends LinearOpMode {
 
         clawArm.setPosition(clawArmDropPose);
         clawWrist.setPosition(clawWristDropPose);
-        sleep(500);
+        sleep(250);
         claw.setPosition(clawReleasePose);
-        sleep(500);
-        clawArm.setPosition(clawArmBasePose);
-        clawWrist.setPosition(clawWristBasePose);
-        claw.setPosition(clawCatchTightPose);
-        sleep(500);
-        setSlider(vSlider, 0, vSliderVelocity);
+        sleep(250);
+
 
 //Drop First Yellow End
 //Consume Second Yellow Start
@@ -200,8 +194,12 @@ public class BasicAutonBAYS extends LinearOpMode {
                 .setReversed(false)
                 .addDisplacementMarker(1, () -> {
                     setSlider(hSlider, hSliderMinPose, hSliderVelocity);
+                    clawArm.setPosition(clawArmBasePose);
+                    clawWrist.setPosition(clawWristBasePose);
+                    claw.setPosition(clawCatchTightPose);
+                    setSlider(vSlider, 0, vSliderVelocity);
                 })
-                .splineToLinearHeading(new Pose2d(46, 41, Math.toRadians(-90)), Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(-46, -42, Math.toRadians(90)), Math.toRadians(-90))
                 .build();
         drive.followTrajectorySequence(trajSequence);
         while (hSlider.isBusy()) {
@@ -218,17 +216,17 @@ public class BasicAutonBAYS extends LinearOpMode {
         setSlider(hSlider, hSliderMaxPose, hSliderVelocity);
         while (hSlider.isBusy()) {
             sampleSensorState = getSampleSensorState();
-            if (hSliderMaxPose - hSlider.getCurrentPosition() < 5 || sampleSensorState == ATE.SampleSensorState.YELLOW || sampleSensorState == ATE.SampleSensorState.BLUE) {
+            if (hSliderMaxPose - hSlider.getCurrentPosition() < 5 || sampleSensorState == ATE.SampleSensorState.YELLOW || sampleSensorState == ATE.SampleSensorState.RED) {
                 break;
             }
         }
-        setSlider(hSlider, 0, vSliderVelocity);
+        //setSlider(hSlider, 0, vSliderVelocity);
         intakeWrist.setPosition(ATC.intakeWristBasePose);
-        while (hSlider.isBusy()) {
+        /*while (hSlider.isBusy()) {
             if (hSlider.getCurrentPosition() < 5) {
                 break;
             }
-        }
+        }*/
         resetSlider(vSlider, vtSensor, 2);
         resetSlider(hSlider, htSensor, 2);
         intakeWrist.setPosition(ATC.intakeWristConsumePose);
@@ -245,7 +243,7 @@ public class BasicAutonBAYS extends LinearOpMode {
         clawArm.setPosition(clawArmBasePose);
 ///Drop Second Yellow Starts
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
-                .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(-135)), Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(-55, -56, Math.toRadians(45)), Math.toRadians(-90))
                 .addDisplacementMarker(1, () -> {
                     setSlider(vSlider, vSliderBaskHighPose, vSliderVelocity);
                 })
@@ -253,16 +251,16 @@ public class BasicAutonBAYS extends LinearOpMode {
         drive.followTrajectorySequence(trajSequence);
 
 
-        while ((vSliderBaskHighPose - vSlider.getCurrentPosition()) < 20) {
+        while ((vSliderBaskHighPose - vSlider.getCurrentPosition()) < 100) {
             telemetry.addData("Drop Second Yellow vSlider Current Position", vSlider.getCurrentPosition());
             telemetry.update();
         }
 
         clawArm.setPosition(clawArmDropPose);
         clawWrist.setPosition(clawWristDropPose);
-        sleep(500);
+        sleep(250);
         claw.setPosition(clawReleasePose);
-        sleep(500);
+        sleep(250);
 
 
 ///Drop Second Yellow Ends
@@ -271,10 +269,13 @@ public class BasicAutonBAYS extends LinearOpMode {
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
                 .setReversed(false)
                 .addDisplacementMarker(1, () -> {
+                    clawArm.setPosition(clawArmBasePose);
+                    clawWrist.setPosition(clawWristBasePose);
+                    claw.setPosition(clawCatchTightPose);
                     setSlider(hSlider, hSliderMinPose, hSliderVelocity);
                     setSlider(vSlider, 0, vSliderVelocity);
                 })
-                .splineToLinearHeading(new Pose2d(56.5, 41, Math.toRadians(-90)), Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(-55, -42, Math.toRadians(90)), Math.toRadians(-90))
                 .build();
         drive.followTrajectorySequence(trajSequence);
         while (hSlider.isBusy()) {
@@ -291,17 +292,17 @@ public class BasicAutonBAYS extends LinearOpMode {
         setSlider(hSlider, hSliderMaxPose, hSliderVelocity);
         while (hSlider.isBusy()) {
             sampleSensorState = getSampleSensorState();
-            if (hSliderMaxPose - hSlider.getCurrentPosition() < 5 || sampleSensorState == ATE.SampleSensorState.YELLOW || sampleSensorState == ATE.SampleSensorState.BLUE) {
+            if (hSliderMaxPose - hSlider.getCurrentPosition() < 5 || sampleSensorState == ATE.SampleSensorState.YELLOW || sampleSensorState == ATE.SampleSensorState.RED) {
                 break;
             }
         }
-        setSlider(hSlider, 0, vSliderVelocity);
+        //setSlider(hSlider, 0, vSliderVelocity);
         intakeWrist.setPosition(ATC.intakeWristBasePose);
-        while (hSlider.isBusy()) {
+        /*while (hSlider.isBusy()) {
             if (hSlider.getCurrentPosition() < 5) {
                 break;
             }
-        }
+        }*/
         resetSlider(vSlider, vtSensor, 2);
         resetSlider(hSlider, htSensor, 2);
         intakeWrist.setPosition(ATC.intakeWristConsumePose);
@@ -318,23 +319,23 @@ public class BasicAutonBAYS extends LinearOpMode {
         clawArm.setPosition(clawArmBasePose);
 ///Drop Third Yellow Starts
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
-                .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(-135)), Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(-56, -56, Math.toRadians(45)), Math.toRadians(-90))
                 .addDisplacementMarker(0, () -> {
                     setSlider(vSlider, vSliderBaskHighPose, vSliderVelocity);
                 })
                 .build();
         drive.followTrajectorySequence(trajSequence);
 
-        while ((vSliderBaskHighPose - vSlider.getCurrentPosition()) < 20) {
+        while ((vSliderBaskHighPose - vSlider.getCurrentPosition()) < 100) {
             telemetry.addData("Drop Second Yellow vSlider Current Position", vSlider.getCurrentPosition());
             telemetry.update();
         }
 
         clawArm.setPosition(clawArmDropPose);
         clawWrist.setPosition(clawWristDropPose);
-        sleep(500);
+        sleep(250);
         claw.setPosition(clawReleasePose);
-        sleep(500);
+        sleep(250);
 
 
 ///Drop Third Yellow Ends
@@ -348,7 +349,9 @@ public class BasicAutonBAYS extends LinearOpMode {
                     claw.setPosition(clawCatchTightPose);
                     setSlider(vSlider, 0, vSliderVelocity);
                 })
-                .splineToLinearHeading(new Pose2d(28,12,Math.toRadians(-180)),Math.toRadians(150))
+                .splineToLinearHeading(new Pose2d(-28,-10,Math.toRadians(0)),Math.toRadians(10),
+                        SampleMecanumDrive.getVelocityConstraint(50.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
         drive.followTrajectorySequence(trajSequence);
 
