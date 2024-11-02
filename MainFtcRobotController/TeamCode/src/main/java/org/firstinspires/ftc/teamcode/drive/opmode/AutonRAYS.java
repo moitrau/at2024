@@ -349,6 +349,14 @@ public class AutonRAYS extends LinearOpMode {
                     claw.setPosition(clawCatchTightPose);
                     setSlider(vSlider, 0, vSliderVelocity);
                 })
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(-59,-14,Math.toRadians(90)),Math.toRadians(120),
+                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .setReversed(true)
+                .lineToLinearHeading(new Pose2d(-59,-40,Math.toRadians(90)),
+                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .splineToLinearHeading(new Pose2d(-28,-10,Math.toRadians(0)),Math.toRadians(10),
                         SampleMecanumDrive.getVelocityConstraint(50.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))

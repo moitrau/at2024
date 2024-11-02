@@ -6,6 +6,11 @@ Enums used by AT24 - Into The Deep
 
 public class ATE {
 
+    public enum HangerState {
+        IDLE,
+        ACTIVE
+    };
+
     public enum HorizontalSliderState {
         BASE,
         EXTENDED,

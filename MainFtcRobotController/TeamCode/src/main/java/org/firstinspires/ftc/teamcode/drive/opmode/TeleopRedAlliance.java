@@ -38,6 +38,7 @@ public class TeleopRedAlliance extends LinearOpMode {
     ATE.HorizontalSliderState hSliderState = ATE.HorizontalSliderState.BASE;
     ATE.VerticalSliderState vSliderState = ATE.VerticalSliderState.BASE;
     ATE.SampleSensorState sampleSensorState = ATE.SampleSensorState.NONE;
+    ATE.HangerState hangerState = ATE.HangerState.IDLE;
 
     private DcMotor rightRear;
     private DcMotor rightFront;
@@ -205,7 +206,7 @@ public class TeleopRedAlliance extends LinearOpMode {
                 intakeWrist.setPosition(ATC.intakeWristBasePose);
                 hSlider.setPower(0.7);
             //If no buttons are pressed move intake wrist to base position
-            }else{
+            }else if(hangerState == ATE.HangerState.IDLE){
                 intakeWrist.setPosition(ATC.intakeWristBasePose);
                 hSlider.setPower(0);
             }
@@ -431,19 +432,35 @@ public class TeleopRedAlliance extends LinearOpMode {
 //Specimen code ends
 */
 //Code to hang onto submersible starts
-            if (gamepad2.right_bumper) {
+            if (gamepad2.right_bumper && hangerState == ATE.HangerState.IDLE) {
+                hangerState = ATE.HangerState.ACTIVE;
+                hSlider.setPower(0);
+                vSlider.setPower(0);
+                leftFront.setPower(0);
+                rightFront.setPower(0);
+                leftRear.setPower(0);
+                rightRear.setPower(0);
                 leftHook.setPower(1);
                 rightHook.setPower(1);
-            } else {
-                leftHook.setPower(0);
-                rightHook.setPower(0);
+                intakeLW.getController().pwmDisable();
+                intakeRW.getController().pwmDisable();
+                intakeWrist.getController().pwmDisable();
+                claw.getController().pwmDisable();
+                clawWrist.getController().pwmDisable();
+                clawArm.getController().pwmDisable();
             }
-            if (gamepad2.left_bumper) {
-                leftHook.setPower(-1);
-                rightHook.setPower(-1);
-            } else {
+
+            if (gamepad2.left_bumper && hangerState == ATE.HangerState.ACTIVE) {
+                hangerState = ATE.HangerState.IDLE;
                 leftHook.setPower(0);
                 rightHook.setPower(0);
+                intakeLW.getController().pwmEnable();
+                intakeRW.getController().pwmEnable();
+                intakeWrist.getController().pwmEnable();
+                claw.getController().pwmEnable();
+                clawWrist.getController().pwmEnable();
+                clawArm.getController().pwmEnable();
+
             }
 //Code to hang onto submersible ends
 
@@ -466,7 +483,8 @@ public class TeleopRedAlliance extends LinearOpMode {
             telemetry.addData("grabTimer:",grabTimer.elapsedTime());
             telemetry.addData("clawTimer:",clawTimer.elapsedTime());
             telemetry.addData("pickTimer:",pickTimer.elapsedTime());
-
+            telemetry.addData("HangerState:",hangerState);
+            telemetry.addData("Hook Power:",rightHook.getPower());
             telemetry.update();
  ///////Drive Code////////////
 

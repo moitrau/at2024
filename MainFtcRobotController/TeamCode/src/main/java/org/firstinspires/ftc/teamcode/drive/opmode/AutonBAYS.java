@@ -174,7 +174,7 @@ public class AutonBAYS extends LinearOpMode {
 
 
 
-        while ((vSliderBaskHighPose - vSlider.getCurrentPosition()) < 100) {
+        while ((vSliderBaskHighPose - vSlider.getCurrentPosition()) < 50) {
             telemetry.addData("Drop First Yellow vSlider Current Position", vSlider.getCurrentPosition());
             telemetry.update();
         }
@@ -251,7 +251,7 @@ public class AutonBAYS extends LinearOpMode {
         drive.followTrajectorySequence(trajSequence);
 
 
-        while ((vSliderBaskHighPose - vSlider.getCurrentPosition()) < 100) {
+        while ((vSliderBaskHighPose - vSlider.getCurrentPosition()) < 50) {
             telemetry.addData("Drop Second Yellow vSlider Current Position", vSlider.getCurrentPosition());
             telemetry.update();
         }
@@ -349,8 +349,16 @@ public class AutonBAYS extends LinearOpMode {
                     claw.setPosition(clawCatchTightPose);
                     setSlider(vSlider, 0, vSliderVelocity);
                 })
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(59,14,Math.toRadians(-90)),Math.toRadians(60),
+                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .setReversed(true)
+                .lineToLinearHeading(new Pose2d(59,40,Math.toRadians(-90)),
+                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .splineToLinearHeading(new Pose2d(28,12,Math.toRadians(-180)),Math.toRadians(150),
-                        SampleMecanumDrive.getVelocityConstraint(50.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
         drive.followTrajectorySequence(trajSequence);
