@@ -5,7 +5,7 @@ Constants used by AT24 - Into The Deep
  */
 public class ATC {
 
-    public static final double clawCatchTightPose = 0.8;
+    public static final double clawCatchTightPose = 1;
     public static final double clawCatchLoosePose = 0.7;
     public static final double clawReleasePose = 0.4;
 
@@ -34,7 +34,7 @@ public class ATC {
     public static final int vSliderBasePose = 0;
     public static final int vSliderWallLiftPose = 500;
     public static final int vSliderSubmHighPose = 1750;
-    public static final int vSliderSubmMidPose = 1150;
+    public static final int vSliderSubmMidPose = 1200;
     public static final int vSliderSubmLowPose = 900;
     public static final int vSliderBaskHighPose = 4000;
     //public static final int vSliderBaskHighPose = 1750;
@@ -50,7 +50,7 @@ public class ATC {
     public static final double hSliderMaxTime = 10.0;
     public static final double vSliderMaxTime = 10.0;
     public static final double consumeMaxTime = 0.75;
-    public static final double grabMaxTime = 0.5;
+    public static final double grabMaxTime = 0.75;
     public static final double clawMaxTime = 0.5;
     public static final double pickMaxTime = 0.5;
     public static final double dropMaxTime = 0.5;

@@ -147,6 +147,7 @@ public class TeleopBlueAlliance extends LinearOpMode {
         vSliderTimer = resetTimer();
         vSliderTimer = startTimer();
 
+        vSlider.setDirection(DcMotor.Direction.REVERSE);
         while((!vtSensor.isPressed()) && elapsedTime(vSliderTimer) <= ATC.vSliderMaxTime){
             vSlider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             telemetry.addData("MaxTimer", ATC.vSliderMaxTime);
@@ -381,21 +382,29 @@ public class TeleopBlueAlliance extends LinearOpMode {
                 clawArm.setPosition(clawArmHangPose);
                 setSlider(vSlider,ATC.vSliderSubmMidPose,1000);
                 vSliderState = ATE.VerticalSliderState.SUBM_LOW;
+                //clawWrist.getController().pwmDisable();
                 clawArmState = ATE.ClawArmState.HANG;
             }
+            if( vSlider.getCurrentPosition() <= ATC.vSliderSubmHighPose-200  && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
+                clawArm.setPosition(clawArmWallPose);
+                clawWrist.setPosition(clawWristDropPose);
+
+            }
             if( vSlider.getCurrentPosition() <= ATC.vSliderSubmMidPose+10 && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
-                TrajectorySequence trajSeq = drive.trajectorySequenceBuilder(new Pose2d())
+                /*TrajectorySequence trajSeq = drive.trajectorySequenceBuilder(new Pose2d())
                         .back(2)
                         .build();
                 drive.followTrajectorySequence(trajSeq);
+                */
+
                 //sleep(5000);
                 //claw.setPosition(clawCatchTightPose+0.05);
                 //clawArm.setPosition(clawArmWallPose);
                // clawWrist.setPosition(clawWristWallPose);
 
-                sleep(1000);
+                //sleep(5);
                 claw.setPosition(clawReleasePose);
-                sleep(1000);
+                //sleep(1000);
                 //clawArm.setPosition(clawArmBasePose);
                 //clawWrist.setPosition(clawWristBasePose);
                 //clawWristState = ATE.ClawWristState.BASE;
@@ -408,6 +417,7 @@ public class TeleopBlueAlliance extends LinearOpMode {
                 clawWrist.setPosition(clawWristBasePose);
                 clawWristState = ATE.ClawWristState.BASE;
                 clawArmState = ATE.ClawArmState.BASE;
+                clawWrist.getController().pwmEnable();
             }
 
 /*
