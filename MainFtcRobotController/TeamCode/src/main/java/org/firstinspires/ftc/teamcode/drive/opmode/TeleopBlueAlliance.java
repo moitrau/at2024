@@ -417,7 +417,7 @@ public class TeleopBlueAlliance extends LinearOpMode {
                 clawWrist.setPosition(clawWristBasePose);
                 clawWristState = ATE.ClawWristState.BASE;
                 clawArmState = ATE.ClawArmState.BASE;
-                clawWrist.getController().pwmEnable();
+
             }
 
 /*
