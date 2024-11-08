@@ -150,21 +150,8 @@ public class AutonBABS extends LinearOpMode {
         Pose2d startPose;
         startPose = new Pose2d(-9, 64, Math.toRadians(90));
         drive.setPoseEstimate(startPose);
-        /*
-        TrajectorySequence traj = drive.trajectorySequenceBuilder(startPose)
-                .lineToLinearHeading(new Pose2d(9,37,Math.toRadians(90)))
-                .lineToLinearHeading(new Pose2d(37,37,Math.toRadians(-45)))
-                .lineToLinearHeading(new Pose2d(54,54,Math.toRadians(-135)))
-                .lineToLinearHeading(new Pose2d(58,40,Math.toRadians(-90)))
-                .lineToLinearHeading(new Pose2d(54,54,Math.toRadians(-135)))
-                .lineToLinearHeading(new Pose2d(58,40,Math.toRadians(-45)))
 
-                .lineToLinearHeading(new Pose2d(54,54,Math.toRadians(-135)))
-                .lineToLinearHeading(new Pose2d(27,12,Math.toRadians(0)))
-                .splineToLinearHeading(new Pose2d(32,12,Math.toRadians(-0)),Math.toRadians(-160))
-                .build();*/
-
-//Drop First Yellow Start
+//Hang first blue Start
         TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(startPose).setReversed(true)
                 .setReversed(true)
                 .lineToLinearHeading(new Pose2d(-9,37.5,Math.toRadians(90)))
@@ -198,9 +185,9 @@ public class AutonBABS extends LinearOpMode {
         claw.setPosition(clawReleasePose);
         clawArm.setPosition(clawArmBasePose);
         clawWrist.setPosition(clawWristBasePose);
-
+//Hang first blue ends
         vSliderState = ATE.VerticalSliderState.EXTENDED;
-
+//Consume first blue starts
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
                 .setReversed(false)
                 .splineToLinearHeading(new Pose2d(-50, 46, Math.toRadians(-90)), Math.toRadians(-90))
