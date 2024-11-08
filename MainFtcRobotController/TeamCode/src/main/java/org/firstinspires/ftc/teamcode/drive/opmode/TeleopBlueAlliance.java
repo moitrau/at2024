@@ -202,13 +202,13 @@ public class TeleopBlueAlliance extends LinearOpMode {
             if (gamepad1.dpad_left && hSliderState != ATE.HorizontalSliderState.BASE) {
                 intakeWrist.setPosition(ATC.intakeWristBasePose);
                 hSlider.setPower(-0.7);
-             //Below if condition is to extend horizontal slider outside
+                //Below if condition is to extend horizontal slider outside
             }else if(gamepad1.dpad_right && hSlider.getCurrentPosition()<=ATC.hSliderMaxPose){
                 hSliderState = ATE.HorizontalSliderState.EXTENDED;
                 intakeWristState = ATE.IntakeWristState.BASE;
                 intakeWrist.setPosition(ATC.intakeWristBasePose);
                 hSlider.setPower(0.7);
-            //If no buttons are pressed move intake wrist to base position
+                //If no buttons are pressed move intake wrist to base position
             }else if(hangerState == ATE.HangerState.IDLE){
                 intakeWrist.setPosition(ATC.intakeWristBasePose);
                 hSlider.setPower(0);
@@ -238,7 +238,7 @@ public class TeleopBlueAlliance extends LinearOpMode {
                 intakeRW.setPosition(0.9);
                 sampleSensorState = getSampleSensorState();
                 intakeWrist.setPosition(ATC.intakeWristOuttakePose);
-            //Below if condition is to start intake
+                //Below if condition is to start intake
             }else if ((gamepad1.x && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) && sampleSensorState == ATE.SampleSensorState.NONE && hSliderState == ATE.HorizontalSliderState.EXTENDED) {
                 intakeLW.setDirection(Servo.Direction.REVERSE);
                 intakeRW.setDirection(Servo.Direction.FORWARD);
@@ -385,7 +385,7 @@ public class TeleopBlueAlliance extends LinearOpMode {
                 //clawWrist.getController().pwmDisable();
                 clawArmState = ATE.ClawArmState.HANG;
             }
-            if( vSlider.getCurrentPosition() <= ATC.vSliderSubmHighPose-200  && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
+            if( vSlider.getCurrentPosition() <= ATC.vSliderSubmHighPose-100  && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
                 clawArm.setPosition(clawArmWallPose);
                 clawWrist.setPosition(clawWristDropPose);
 
@@ -400,7 +400,7 @@ public class TeleopBlueAlliance extends LinearOpMode {
                 //sleep(5000);
                 //claw.setPosition(clawCatchTightPose+0.05);
                 //clawArm.setPosition(clawArmWallPose);
-               // clawWrist.setPosition(clawWristWallPose);
+                // clawWrist.setPosition(clawWristWallPose);
 
                 //sleep(5);
                 claw.setPosition(clawReleasePose);
@@ -497,8 +497,13 @@ public class TeleopBlueAlliance extends LinearOpMode {
             telemetry.addData("pickTimer:",pickTimer.elapsedTime());
             telemetry.addData("HangerState:",hangerState);
             telemetry.addData("Hook Power:",rightHook.getPower());
+            ((NormalizedColorSensor) sampleSensor).setGain(2);
+            double distance = ((DistanceSensor) sampleSensor).getDistance(DistanceUnit.CM);
+
+            double hue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) sampleSensor).getNormalizedColors().toColor()), 0));
+            telemetry.addData("Hue:",hue);
             telemetry.update();
- ///////Drive Code////////////
+            ///////Drive Code////////////
 
 
             if(gamepad1.left_bumper){
@@ -600,7 +605,7 @@ public class TeleopBlueAlliance extends LinearOpMode {
 
         if (distance <= 4 && hue >= 200 && hue <= 240) {
             return ATE.SampleSensorState.BLUE;
-        } else if (distance <= 4 && hue >= 80 && hue <= 100) {
+        } else if (distance <= 4 && hue >= 65 && hue <= 100) {
             return ATE.SampleSensorState.YELLOW;
         } else if (distance <= 4 && hue >= 0 && hue <= 60) {
             return ATE.SampleSensorState.RED;
