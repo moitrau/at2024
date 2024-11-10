@@ -16,15 +16,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.ATC;
 import org.firstinspires.ftc.teamcode.drive.ATE;
 import org.firstinspires.ftc.teamcode.drive.ATRoboTimer;
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 /*
  * This is an example of a more complex path to really test the tuning.
  */
-@Autonomous(name = "02_AutonBlueAllianceBlueSample")
-public class AutonBABS extends LinearOpMode {
+@Autonomous(name = "02_AutonBlueAlliance2BlueSamples")
+public class AutonBABS2 extends LinearOpMode {
 
 
     ATE.ClawState clawState = ATE.ClawState.CATCH;
@@ -167,9 +166,9 @@ public class AutonBABS extends LinearOpMode {
         claw.setPosition(clawCatchTightPose);
         clawWrist.setPosition(clawWristHangPose);
         clawArm.setPosition(clawArmHangPose);
-        setSlider(vSlider,ATC.vSliderSubmLowPose,1000);
+        setSlider(vSlider,ATC.vSliderSubmLowPose,750);
 
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-300) {
+        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-350) {
             telemetry.addData("Hang First Specimen vSlider Current Position1", vSlider.getCurrentPosition());
             telemetry.update();
         }
@@ -177,7 +176,7 @@ public class AutonBABS extends LinearOpMode {
         clawArm.setPosition(clawArmWallPose);
         clawWrist.setPosition(clawWristDropPose);
 
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-500 ) {
+        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-550 ) {
             telemetry.addData("Hang First Specimen vSlider Current Position2", vSlider.getCurrentPosition());
             telemetry.update();
         }
@@ -185,138 +184,77 @@ public class AutonBABS extends LinearOpMode {
         claw.setPosition(clawReleasePose);
         clawArm.setPosition(clawArmBasePose);
         clawWrist.setPosition(clawWristBasePose);
+        resetSlider(vSlider, vtSensor, 2);
 //Hang first blue ends
-        vSliderState = ATE.VerticalSliderState.EXTENDED;
-//Consume first blue starts
+
+//Push Two Blues
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
                 .setReversed(false)
-                .splineToLinearHeading(new Pose2d(-50, 46, Math.toRadians(-90)), Math.toRadians(-90))
-                .addDisplacementMarker(40, () -> {
-                    setSlider(hSlider, hSliderMinPose, hSliderVelocity);
-                    clawArm.setPosition(clawArmBasePose);
-                    clawWrist.setPosition(clawWristBasePose);
+                .splineToLinearHeading(new Pose2d(-34,34,Math.toRadians(-90)),Math.toRadians(-90))
+                .splineToLinearHeading(new Pose2d(-45,16,Math.toRadians(-90)),Math.toRadians(145))
+                .setReversed(true)
+                .lineToLinearHeading(new Pose2d(-45,56,Math.toRadians(-90)))
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(-55,16,Math.toRadians(-90)),Math.toRadians(145))
+                .setReversed(true)
+                .lineToLinearHeading(new Pose2d(-55,60,Math.toRadians(-90)))
+                .addDisplacementMarker(100, () -> {
+                    clawArm.setPosition(clawArmWallPose);
+                    clawWrist.setPosition(clawWristWallPose);
+                    claw.setPosition(clawReleasePose);
+                    })
+                .build();
+        drive.followTrajectorySequence(trajSequence);
+
+//Pick from wall and hang 2nd Blue
+
+        claw.setPosition(clawCatchTightPose);
+        sleep(200);
+        clawWrist.setPosition(clawWristDropPose);
+        setSlider(vSlider,ATC.vSliderWallLiftPose,vSliderVelocity);
+
+        trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(-7,36.5,Math.toRadians(80)),Math.toRadians(-60))
+                .addDisplacementMarker(1, () -> {
+                    setSlider(vSlider, vSliderSubmHighPose+50, vSliderVelocity);
                     claw.setPosition(clawCatchTightPose);
-                    setSlider(vSlider, 0, vSliderVelocity);
+                    clawWrist.setPosition(clawWristHangPose);
+                    clawArm.setPosition(clawArmHangPose);
                 })
                 .build();
         drive.followTrajectorySequence(trajSequence);
-        while (hSlider.isBusy()) {
-            if (hSliderMinPose - hSlider.getCurrentPosition() < 1) {
-                break;
-            }
+        claw.setPosition(clawCatchTightPose);
+        clawWrist.setPosition(clawWristHangPose);
+        clawArm.setPosition(clawArmHangPose);
+        setSlider(vSlider,ATC.vSliderSubmLowPose,750);
+
+        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-350) {
+            telemetry.addData("Hang First Specimen vSlider Current Position1", vSlider.getCurrentPosition());
+            telemetry.update();
         }
-        intakeLW.setDirection(Servo.Direction.REVERSE);
-        intakeRW.setDirection(Servo.Direction.FORWARD);
-        intakeLW.setPosition(0.9);
-        intakeRW.setPosition(0.9);
-        intakeWrist.setPosition(ATC.intakeWristIntakePose);
-        sleep(500);
-        setSlider(hSlider, hSliderMaxPose, hSliderVelocity);
-        while (hSlider.isBusy()) {
-            sampleSensorState = getSampleSensorState();
-            if (hSliderMaxPose - hSlider.getCurrentPosition() < 5 || sampleSensorState == ATE.SampleSensorState.YELLOW || sampleSensorState == ATE.SampleSensorState.BLUE) {
-                break;
-            }
-        }
-        //setSlider(hSlider, 0, vSliderVelocity);
-        intakeWrist.setPosition(ATC.intakeWristBasePose);
-        /*while (hSlider.isBusy()) {
-            if (hSlider.getCurrentPosition() < 5) {
-                break;
-            }
-        }*/
-        resetSlider(vSlider, vtSensor, 2);
-        resetSlider(hSlider, htSensor, 2);
-        intakeWrist.setPosition(ATC.intakeWristConsumePose);
-        intakeLW.setPosition(0.5);
-        intakeRW.setPosition(0.5);
-        sleep(500);
-        intakeWrist.setPosition(ATC.intakeWristPickIntakePose);
-        clawWrist.setPosition(clawWristBasePose);
-        clawArm.setPosition(clawArmIntakePose);
-        claw.setPosition(clawReleasePose);
-        sleep(750);
-        claw.setPosition(clawCatchLoosePose);
-        sleep(500);
+
         clawArm.setPosition(clawArmWallPose);
-        sleep(250);
-        clawWrist.setPosition(clawWristWallPose);
-        sleep(250);
+        clawWrist.setPosition(clawWristDropPose);
+
+        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-550 ) {
+            telemetry.addData("Hang First Specimen vSlider Current Position2", vSlider.getCurrentPosition());
+            telemetry.update();
+        }
+
         claw.setPosition(clawReleasePose);
-////Consume first blue ends
-////Consume second blue starts
-        vSliderState = ATE.VerticalSliderState.EXTENDED;
+        clawArm.setPosition(clawArmBasePose);
+        clawWrist.setPosition(clawWristBasePose);
+        resetSlider(vSlider, vtSensor, 2);
+
+// Park
 
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(-60, 46, Math.toRadians(-90)))
-                .addDisplacementMarker(1, () -> {
-                    setSlider(hSlider, hSliderMinPose, hSliderVelocity);
-                    clawArm.setPosition(clawArmBasePose);
-                    clawWrist.setPosition(clawWristBasePose);
-                    claw.setPosition(clawCatchTightPose);
-                    setSlider(vSlider, 0, vSliderVelocity);
-                })
+                .splineToLinearHeading(new Pose2d(-55,60,Math.toRadians(-90)),Math.toRadians(90))
                 .build();
         drive.followTrajectorySequence(trajSequence);
-        while (hSlider.isBusy()) {
-            if (hSliderMinPose - hSlider.getCurrentPosition() < 1) {
-                break;
-            }
-        }
-        intakeLW.setDirection(Servo.Direction.REVERSE);
-        intakeRW.setDirection(Servo.Direction.FORWARD);
-        intakeLW.setPosition(0.9);
-        intakeRW.setPosition(0.9);
-        intakeWrist.setPosition(ATC.intakeWristIntakePose);
-        sleep(500);
-        setSlider(hSlider, hSliderMaxPose, hSliderVelocity);
-        while (hSlider.isBusy()) {
-            sampleSensorState = getSampleSensorState();
-            if (hSliderMaxPose - hSlider.getCurrentPosition() < 5 || sampleSensorState == ATE.SampleSensorState.YELLOW || sampleSensorState == ATE.SampleSensorState.BLUE) {
-                break;
-            }
-        }
-        //setSlider(hSlider, 0, vSliderVelocity);
-        intakeWrist.setPosition(ATC.intakeWristBasePose);
-        /*while (hSlider.isBusy()) {
-            if (hSlider.getCurrentPosition() < 5) {
-                break;
-            }
-        }*/
-        resetSlider(vSlider, vtSensor, 2);
-        resetSlider(hSlider, htSensor, 2);
-        intakeWrist.setPosition(ATC.intakeWristConsumePose);
-        intakeLW.setPosition(0.5);
-        intakeRW.setPosition(0.5);
-        sleep(500);
-        intakeWrist.setPosition(ATC.intakeWristPickIntakePose);
-        clawWrist.setPosition(clawWristBasePose);
-        clawArm.setPosition(clawArmIntakePose);
-        claw.setPosition(clawReleasePose);
-        sleep(750);
-        claw.setPosition(clawCatchLoosePose);
-        sleep(500);
-        clawArm.setPosition(clawArmWallPose);
-        sleep(250);
         clawWrist.setPosition(clawWristWallPose);
-        sleep(250);
-        claw.setPosition(clawReleasePose);
-
-///Consume second blue ends
-//Pickup second blue begins
-
-        trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
-                .setReversed(false)
-                .lineToLinearHeading(new Pose2d(-60, 56, Math.toRadians(-90)))
-                .addDisplacementMarker(1, () -> {
-                    claw.setPosition(clawCatchTightPose);
-                    setSlider(vSlider, ATC.vSliderWallLiftPose, vSliderVelocity);
-                })
-                .build();
-
-
-        sleep(30000);
     }
 
     private void setSlider(DcMotor slider, int targetPose, int velocity) {

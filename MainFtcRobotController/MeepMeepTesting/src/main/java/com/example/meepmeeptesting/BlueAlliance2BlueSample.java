@@ -1,16 +1,12 @@
 package com.example.meepmeeptesting;
 
-import static java.lang.Thread.sleep;
-
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 import org.rowlandhall.meepmeep.MeepMeep;
 import org.rowlandhall.meepmeep.roadrunner.DefaultBotBuilder;
 import org.rowlandhall.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
-import org.rowlandhall.meepmeep.roadrunner.trajectorysequence.TrajectorySequence;
 
-public class MeepMeepTesting {
+public class BlueAlliance2BlueSample {
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(800);
 
@@ -27,15 +23,11 @@ public class MeepMeepTesting {
                         .setReversed(true)
                         .lineToLinearHeading(new Pose2d(-45,56,Math.toRadians(-90)))
                         .setReversed(false)
+                        .splineToLinearHeading(new Pose2d(-54,12,Math.toRadians(-90)),Math.toRadians(145))
+                        .setReversed(true)
+                        .lineToLinearHeading(new Pose2d(-54,56,Math.toRadians(-90)))
+                        .setReversed(false)
                         .splineToLinearHeading(new Pose2d(-7,38,Math.toRadians(90)),Math.toRadians(-60))
-
-
-                        .setReversed(false)
-                        .splineToLinearHeading(new Pose2d(-45,60,Math.toRadians(-90)),Math.toRadians(90))
-
-                        .setReversed(false)
-                        .splineToLinearHeading(new Pose2d(-5,38,Math.toRadians(90)),Math.toRadians(-60))
-
                         .setReversed(false)
                         .splineToLinearHeading(new Pose2d(-54,60,Math.toRadians(-90)),Math.toRadians(90))
 

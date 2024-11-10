@@ -12,17 +12,21 @@ public class ATC {
     public static final double clawWristBasePose = 0.60;
     public static final double clawWristIntakePose = 0.65;
     public static final double clawWristHangPose = 0.0;
-    public static final double clawWristDropPose = 0.23;
-    public static final double clawWristWallPose = 0.20;
+    public static final double clawWristDropPose = 0.25;
+    public static final double clawWristWallPose = 0.25;
+    public static final double clawWristFloorSamplePose = 0.0;
+    public static final double clawWristFloorSpecimenPose = 0.23;
 
-    public static final double clawArmBasePose = 0.41;
-    public static final double clawArmIntakePose = 0.99;
-    public static final double clawArmHangPose = 0.30;
-    public static final double clawArmDropPose = 0.30;
-    public static final double clawArmWallPose = 0.10;
+    public static final double clawArmBasePose = 0.55;
+    public static final double clawArmIntakePose = 0.95;
+    public static final double clawArmHangPose = 0.45;
+    public static final double clawArmDropPose = 0.45;
+    public static final double clawArmWallPose = 0.30;
+    public static final double clawArmFloorSamplePose = 0.05;
+    public static final double clawArmFloorSpecimenPose = 0.05;
 
-    public static final double intakeWristBasePose = 0.53;
-    public static final double intakeWristPickIntakePose = 0.60;
+    public static final double intakeWristBasePose = 0.50;
+    public static final double intakeWristPickIntakePose = 0.55;
     public static final double intakeWristConsumePose = 0.70;
     public static final double intakeWristOuttakePose = 0.39;
     public static final double intakeWristIntakePose = 0.35;
@@ -33,12 +37,12 @@ public class ATC {
 
     public static final int vSliderBasePose = 0;
     public static final int vSliderWallLiftPose = 500;
-    public static final int vSliderSubmHighPose = 1650;
+    public static final int vSliderSubmHighPose = 1600;
     public static final int vSliderSubmMidPose = 1200;
     public static final int vSliderSubmLowPose = 900;
     public static final int vSliderBaskHighPose = 4000;
     //public static final int vSliderBaskHighPose = 1750;
-    public static final int vSliderBaskLowPose = 1750;
+    public static final int vSliderBaskLowPose = 1600;
     public static final int vSliderVelocity=10000;
 
     public static final int hSliderBasePose = 0;

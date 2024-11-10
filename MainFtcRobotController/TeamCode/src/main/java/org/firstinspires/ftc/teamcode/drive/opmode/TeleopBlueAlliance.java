@@ -378,7 +378,7 @@ public class TeleopBlueAlliance extends LinearOpMode {
 
             if(gamepad2.b && sampleSensorState == ATE.SampleSensorState.NONE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_HIGH ){
                 claw.setPosition(clawCatchTightPose);
-                clawWrist.setPosition(clawWristHangPose);
+                clawWrist.setPosition(clawWristHangPose-0.05);
                 clawArm.setPosition(clawArmHangPose);
                 setSlider(vSlider,ATC.vSliderSubmMidPose,1000);
                 vSliderState = ATE.VerticalSliderState.SUBM_LOW;
