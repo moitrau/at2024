@@ -46,6 +46,7 @@ public class ATE {
         BASE,
         PICK_INTAKE,
         PICK_WALL,
+        PICK_FLOOR,
         HANG,
         DROP
     };
@@ -53,6 +54,7 @@ public class ATE {
         BASE,
         PICK_INTAKE,
         PICK_WALL,
+        PICK_FLOOR,
         HANG,
         DROP
     };

@@ -350,14 +350,21 @@ public class TeleopBlueAlliance extends LinearOpMode {
 
 //Specimen code starts
 
-            if(gamepad1.a && sampleSensorState == ATE.SampleSensorState.NONE && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
+            if(gamepad1.dpad_up && gamepad1.a && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
                 clawArm.setPosition(clawArmWallPose);
                 clawWrist.setPosition(clawWristWallPose);
                 sleep(250);
                 claw.setPosition(clawReleasePose);
                 clawWristState = ATE.ClawWristState.PICK_WALL;
             }
-            if(gamepad1.b && sampleSensorState == ATE.SampleSensorState.NONE && clawWristState == ATE.ClawWristState.PICK_WALL && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
+            if(gamepad1.dpad_down && gamepad1.a && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
+                clawArm.setPosition(ATC.clawArmFloorPose);
+                clawWrist.setPosition(ATC.clawWristFloorPose);
+                sleep(250);
+                claw.setPosition(clawReleasePose);
+                clawWristState = ATE.ClawWristState.PICK_FLOOR;
+            }
+            if(gamepad1.b && sampleSensorState == ATE.SampleSensorState.NONE && ( clawWristState == ATE.ClawWristState.PICK_FLOOR || clawWristState == ATE.ClawWristState.PICK_WALL ) && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
                 claw.setPosition(clawCatchTightPose);
                 sleep(200);
                 clawWrist.setPosition(clawWristDropPose);
@@ -371,26 +378,26 @@ public class TeleopBlueAlliance extends LinearOpMode {
                 claw.setPosition(clawCatchTightPose);
                 clawWrist.setPosition(clawWristHangPose);
                 clawArm.setPosition(clawArmHangPose);
-                setSlider(vSlider,vSliderSubmHighPose,vSliderVelocity);
+                setSlider(vSlider,vSliderSubmHighPose+50,vSliderVelocity);
                 vSliderState = ATE.VerticalSliderState.SUBM_HIGH;
                 clawWristState = ATE.ClawWristState.HANG;
             }
 
             if(gamepad2.b && sampleSensorState == ATE.SampleSensorState.NONE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_HIGH ){
                 claw.setPosition(clawCatchTightPose);
-                clawWrist.setPosition(clawWristHangPose-0.05);
+                clawWrist.setPosition(clawWristHangPose);
                 clawArm.setPosition(clawArmHangPose);
-                setSlider(vSlider,ATC.vSliderSubmMidPose,1000);
+                setSlider(vSlider,ATC.vSliderSubmLowPose,750);
                 vSliderState = ATE.VerticalSliderState.SUBM_LOW;
                 //clawWrist.getController().pwmDisable();
                 clawArmState = ATE.ClawArmState.HANG;
             }
-            if( vSlider.getCurrentPosition() <= ATC.vSliderSubmHighPose-100  && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
+            if( vSlider.getCurrentPosition() <= ATC.vSliderSubmHighPose-350  && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
                 clawArm.setPosition(clawArmWallPose);
                 clawWrist.setPosition(clawWristDropPose);
 
             }
-            if( vSlider.getCurrentPosition() <= ATC.vSliderSubmMidPose+10 && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
+            if( vSlider.getCurrentPosition() <= ATC.vSliderSubmHighPose-550 && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
                 /*TrajectorySequence trajSeq = drive.trajectorySequenceBuilder(new Pose2d())
                         .back(2)
                         .build();

@@ -167,7 +167,12 @@ public class AutonBABS3 extends LinearOpMode {
                 })
                 .build();
         drive.followTrajectorySequence(trajSequence);
-
+        telemetry.addData("1.Actual value: -9,37.5,Math.toRadians(90)",1);
+        telemetry.addData("X",drive.getPoseEstimate().getX());
+        telemetry.addData("Y",drive.getPoseEstimate().getY());
+        telemetry.addData("Heading",drive.getPoseEstimate().getHeading());
+        telemetry.update();
+        sleep(5000);
         claw.setPosition(clawCatchTightPose);
         clawWrist.setPosition(clawWristHangPose);
         clawArm.setPosition(clawArmHangPose);
@@ -192,7 +197,7 @@ public class AutonBABS3 extends LinearOpMode {
         resetSlider(vSlider, vtSensor, 2);
 //Hang first blue ends
 
-//Push One Blues
+//Push One Blue
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
 
                 .setReversed(false)
@@ -215,6 +220,12 @@ public class AutonBABS3 extends LinearOpMode {
                     })
                 .build();
         drive.followTrajectorySequence(trajSequence);
+        telemetry.addData("2.Actual value: -45,60,Math.toRadians(-90",1);
+        telemetry.addData("X",drive.getPoseEstimate().getX());
+        telemetry.addData("Y",drive.getPoseEstimate().getY());
+        telemetry.addData("Heading",drive.getPoseEstimate().getHeading());
+        telemetry.update();
+        sleep(5000);
 
 //Pick from wall and hang 2nd Blue
 
@@ -236,6 +247,12 @@ public class AutonBABS3 extends LinearOpMode {
                 })
                 .build();
         drive.followTrajectorySequence(trajSequence);
+        telemetry.addData("3.Actual value: -6,36,Math.toRadians(85)",1);
+        telemetry.addData("X",drive.getPoseEstimate().getX());
+        telemetry.addData("Y",drive.getPoseEstimate().getY());
+        telemetry.addData("Heading",drive.getPoseEstimate().getHeading());
+        telemetry.update();
+        sleep(5000);
         /*calibrationFromLimeLight = new CalibrationFromLimeLight();
         calibrationFromLimeLight.LimeLight3A(0, 0, 0, 0.5, hardwareMap);
         int i = 0;
@@ -313,7 +330,12 @@ public class AutonBABS3 extends LinearOpMode {
                 })
                 .build();
         drive.followTrajectorySequence(trajSequence);
-
+        telemetry.addData("4.Actual value: -44,62,Math.toRadians(-100) ",1);
+        telemetry.addData("X",drive.getPoseEstimate().getX());
+        telemetry.addData("Y",drive.getPoseEstimate().getY());
+        telemetry.addData("Heading",drive.getPoseEstimate().getHeading());
+        telemetry.update();
+        sleep(5000);
 //Pick from wall and hang 3nd Blue
 
         claw.setPosition(clawCatchTightPose);
@@ -334,6 +356,12 @@ public class AutonBABS3 extends LinearOpMode {
                 })
                 .build();
         drive.followTrajectorySequence(trajSequence);
+        telemetry.addData("5.Actual value: -12,36,Math.toRadians(90) ",1);
+        telemetry.addData("X",drive.getPoseEstimate().getX());
+        telemetry.addData("Y",drive.getPoseEstimate().getY());
+        telemetry.addData("Heading",drive.getPoseEstimate().getHeading());
+        telemetry.update();
+        sleep(5000);
         claw.setPosition(clawCatchTightPose);
         clawWrist.setPosition(clawWristHangPose);
         clawArm.setPosition(clawArmHangPose);

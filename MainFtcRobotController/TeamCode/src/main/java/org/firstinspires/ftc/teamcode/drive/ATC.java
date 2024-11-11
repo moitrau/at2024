@@ -14,16 +14,14 @@ public class ATC {
     public static final double clawWristHangPose = 0.0;
     public static final double clawWristDropPose = 0.25;
     public static final double clawWristWallPose = 0.25;
-    public static final double clawWristFloorSamplePose = 0.0;
-    public static final double clawWristFloorSpecimenPose = 0.23;
+    public static final double clawWristFloorPose = 0.25;
 
     public static final double clawArmBasePose = 0.55;
     public static final double clawArmIntakePose = 0.95;
     public static final double clawArmHangPose = 0.45;
     public static final double clawArmDropPose = 0.45;
     public static final double clawArmWallPose = 0.30;
-    public static final double clawArmFloorSamplePose = 0.05;
-    public static final double clawArmFloorSpecimenPose = 0.05;
+    public static final double clawArmFloorPose = 0.0;
 
     public static final double intakeWristBasePose = 0.50;
     public static final double intakeWristPickIntakePose = 0.55;
