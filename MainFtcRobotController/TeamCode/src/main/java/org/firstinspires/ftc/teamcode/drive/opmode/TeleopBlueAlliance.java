@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -14,9 +15,11 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.CalibrationFromLimeLight;
 import org.firstinspires.ftc.teamcode.drive.ATC;
 import org.firstinspires.ftc.teamcode.drive.ATE;
 import org.firstinspires.ftc.teamcode.drive.ATRoboTimer;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
@@ -41,6 +44,7 @@ public class TeleopBlueAlliance extends LinearOpMode {
     ATE.VerticalSliderState vSliderState = ATE.VerticalSliderState.BASE;
     ATE.SampleSensorState sampleSensorState = ATE.SampleSensorState.NONE;
     ATE.HangerState hangerState = ATE.HangerState.IDLE;
+    ATE.BotonState botonState = ATE.BotonState.DISABLED;
 
     private DcMotor rightRear;
     private DcMotor rightFront;
@@ -59,6 +63,9 @@ public class TeleopBlueAlliance extends LinearOpMode {
     private ColorSensor sampleSensor;
     private TouchSensor vtSensor;
     private TouchSensor htSensor;
+
+    private Limelight3A limelight;
+    private CalibrationFromLimeLight calibrationFromLimeLight;
 
     double clawCatchTightPose = ATC.clawCatchTightPose;
     double clawCatchLoosePose = ATC.clawCatchLoosePose;
@@ -426,6 +433,125 @@ public class TeleopBlueAlliance extends LinearOpMode {
                 clawArmState = ATE.ClawArmState.BASE;
 
             }
+//
+            if(gamepad1.left_trigger > 0.25 && botonState == ATE.BotonState.DISABLED) {
+                // Initialize Limelight and CalibrationFromLimeLight
+                limelight = hardwareMap.get(Limelight3A.class, "limelight");
+                calibrationFromLimeLight = new CalibrationFromLimeLight();
+
+                // Set the initial coordinates and margin of error
+                calibrationFromLimeLight.LimeLight3A(0, 0, 0, 0.5, hardwareMap);
+
+                double[] resultCordinates;
+                int scanCount = 0;
+                int maxScans = 3;
+
+                // Loop until y > 0 or the maximum number of scans is reached
+                do {
+                    resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIght();
+                    scanCount++;
+
+                    // Display Y coordinate in telemetry for each scan
+                    telemetry.addData("Scan Count", scanCount);
+                    telemetry.addData("x Coordinate", resultCordinates[0]);
+                    telemetry.addData("Y Coordinate", resultCordinates[1]);
+                    telemetry.addData("Heading", resultCordinates[2]);
+
+
+                    sleep(100); // Adding a short delay between scans
+                } while (resultCordinates[1] <= 0 && scanCount < maxScans);
+
+                if (resultCordinates[1] > 10) {
+                    botonState = ATE.BotonState.TO_OBSV_AREA;
+
+                    // Set the starting pose
+                    Pose2d startPose = new Pose2d(resultCordinates[0], resultCordinates[1], Math.toRadians(resultCordinates[2]));
+                    drive.setPoseEstimate(startPose);
+
+                    telemetry.addData("Drive x Coordinate", drive.getPoseEstimate().getX());
+                    telemetry.addData("Drive Y Coordinate", drive.getPoseEstimate().getY());
+                    telemetry.addData("Drive Heading", Math.toDegrees(drive.getPoseEstimate().getHeading()));
+                    telemetry.update();
+
+
+                    //sleep(5000);
+
+                    // Build and follow trajectory sequence
+                    TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(startPose)
+                            .setReversed(false)
+                            .splineToLinearHeading(new Pose2d(-48, 48, Math.toRadians(-90)), Math.toRadians(90),
+                    SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                            SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+
+                            .build();
+
+                    drive.followTrajectorySequence(trajSequence); // Make sure to follow the trajectory sequence
+                //sleep(500000);
+                    botonState = ATE.BotonState.DISABLED;
+                }
+            }
+
+
+            //
+
+            if(gamepad1.right_trigger > 0.25 && botonState == ATE.BotonState.DISABLED) {
+                // Initialize Limelight and CalibrationFromLimeLight
+                limelight = hardwareMap.get(Limelight3A.class, "limelight");
+                calibrationFromLimeLight = new CalibrationFromLimeLight();
+
+                // Set the initial coordinates and margin of error
+                calibrationFromLimeLight.LimeLight3A(0, 0, 0, 0.5, hardwareMap);
+
+                double[] resultCordinates;
+                int scanCount = 0;
+                int maxScans = 3;
+
+                // Loop until y > 0 or the maximum number of scans is reached
+                do {
+                    resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIght();
+                    scanCount++;
+
+                    // Display Y coordinate in telemetry for each scan
+                    telemetry.addData("Scan Count", scanCount);
+                    telemetry.addData("x Coordinate", resultCordinates[0]);
+                    telemetry.addData("Y Coordinate", resultCordinates[1]);
+                    telemetry.addData("Heading", resultCordinates[2]);
+
+
+                    sleep(100); // Adding a short delay between scans
+                } while (resultCordinates[1] <= 0 && scanCount < maxScans);
+
+                if (resultCordinates[1] > 10) {
+                    botonState = ATE.BotonState.TO_SUBM_AREA;
+
+                    // Set the starting pose
+                    Pose2d startPose = new Pose2d(resultCordinates[0], resultCordinates[1], Math.toRadians(resultCordinates[2]));
+                    drive.setPoseEstimate(startPose);
+
+                    telemetry.addData("Drive x Coordinate", drive.getPoseEstimate().getX());
+                    telemetry.addData("Drive Y Coordinate", drive.getPoseEstimate().getY());
+                    telemetry.addData("Drive Heading", Math.toDegrees(drive.getPoseEstimate().getHeading()));
+                    telemetry.update();
+
+
+                    //sleep(5000);
+
+                    // Build and follow trajectory sequence
+                    TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(startPose)
+                            .setReversed(true)
+                            .splineToLinearHeading(new Pose2d(-3, 40,Math.toRadians(90)), Math.toRadians(-90),
+                                    SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                                    SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+
+                            .build();
+
+                    drive.followTrajectorySequence(trajSequence); // Make sure to follow the trajectory sequence
+                    //sleep(500000);
+                    botonState = ATE.BotonState.DISABLED;
+                }
+            }
+
+
 
 /*
             if(gamepad2.right_bumper && gamepad2.y && clawWristState == ATE.ClawWristState.PICK_WALL && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE && sampleSensorState == ATE.SampleSensorState.NONE ){

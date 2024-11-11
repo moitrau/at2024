@@ -64,4 +64,10 @@ public class ATE {
         RED,
         YELLOW
     };
+
+    public enum BotonState {
+        DISABLED,
+        TO_OBSV_AREA,
+        TO_SUBM_AREA
+    }
 }
