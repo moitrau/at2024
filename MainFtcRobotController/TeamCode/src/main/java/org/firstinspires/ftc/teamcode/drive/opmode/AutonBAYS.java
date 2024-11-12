@@ -136,6 +136,7 @@ public class AutonBAYS extends LinearOpMode {
         intakeRW.setPosition(intakeWheelHaltPose);
         intakeWrist.setPosition(intakeWristBasePose);
         sleep(500);
+        vSlider.setDirection(DcMotor.Direction.REVERSE);
         hSlider.setDirection(DcMotor.Direction.REVERSE);
         resetSlider(hSlider, htSensor, 5);
         resetSlider(vSlider, vtSensor, 5);
@@ -237,7 +238,8 @@ public class AutonBAYS extends LinearOpMode {
         clawWrist.setPosition(clawWristBasePose);
         clawArm.setPosition(clawArmIntakePose);
         claw.setPosition(clawReleasePose);
-        sleep(500);
+        sleep(750);
+        clawWrist.setPosition(clawWristIntakePose);
         claw.setPosition(clawCatchLoosePose);
         sleep(500);
         clawArm.setPosition(clawArmBasePose);
@@ -313,7 +315,8 @@ public class AutonBAYS extends LinearOpMode {
         clawWrist.setPosition(clawWristBasePose);
         clawArm.setPosition(clawArmIntakePose);
         claw.setPosition(clawReleasePose);
-        sleep(500);
+        sleep(750);
+        clawWrist.setPosition(clawWristIntakePose);
         claw.setPosition(clawCatchLoosePose);
         sleep(500);
         clawArm.setPosition(clawArmBasePose);
@@ -357,9 +360,12 @@ public class AutonBAYS extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(59,40,Math.toRadians(-90)),
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .splineToLinearHeading(new Pose2d(28,12,Math.toRadians(-180)),Math.toRadians(150),
+                .lineToLinearHeading(new Pose2d(54,50,Math.toRadians(-90)),
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                //.splineToLinearHeading(new Pose2d(28,12,Math.toRadians(-180)),Math.toRadians(150),
+                //        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                //        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
         drive.followTrajectorySequence(trajSequence);
 

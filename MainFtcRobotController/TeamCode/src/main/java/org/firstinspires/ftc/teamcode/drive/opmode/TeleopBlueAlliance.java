@@ -357,14 +357,7 @@ public class TeleopBlueAlliance extends LinearOpMode {
 
 //Specimen code starts
 
-            if(gamepad1.dpad_up && gamepad1.a && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
-                clawArm.setPosition(clawArmWallPose);
-                clawWrist.setPosition(clawWristWallPose);
-                sleep(250);
-                claw.setPosition(clawReleasePose);
-                clawWristState = ATE.ClawWristState.PICK_WALL;
-            }
-            if(gamepad1.dpad_down && gamepad1.a && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
+            if(gamepad1.a && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
                 clawArm.setPosition(ATC.clawArmFloorPose);
                 clawWrist.setPosition(ATC.clawWristFloorPose);
                 sleep(250);
@@ -373,11 +366,20 @@ public class TeleopBlueAlliance extends LinearOpMode {
             }
             if(gamepad1.b && sampleSensorState == ATE.SampleSensorState.NONE && ( clawWristState == ATE.ClawWristState.PICK_FLOOR || clawWristState == ATE.ClawWristState.PICK_WALL ) && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
                 claw.setPosition(clawCatchTightPose);
-                sleep(200);
-                clawWrist.setPosition(clawWristDropPose);
-                //clawArm.setPosition(clawArmDropPose);
+                sleep(500);
+                clawWrist.setPosition(clawWristBasePose);
+                clawArm.setPosition(clawArmBasePose);
                 setSlider(vSlider,ATC.vSliderWallLiftPose,vSliderVelocity);
                 clawWristState = ATE.ClawWristState.BASE;
+               // Pose2d startPose = new Pose2d(0.0, 0.0, Math.toRadians(0.0));
+               // drive.setPoseEstimate(startPose);
+               // TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(startPose)
+               //         .turn(Math.toRadians(-90))
+               //         .build();
+
+               // drive.followTrajectorySequence(trajSequence);
+
+
             }
 
 
@@ -399,12 +401,12 @@ public class TeleopBlueAlliance extends LinearOpMode {
                 //clawWrist.getController().pwmDisable();
                 clawArmState = ATE.ClawArmState.HANG;
             }
-            if( vSlider.getCurrentPosition() <= ATC.vSliderSubmHighPose-350  && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
+            if( vSlider.getCurrentPosition() <= ATC.vSliderSubmHighPose-200  && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
                 clawArm.setPosition(clawArmWallPose);
                 clawWrist.setPosition(clawWristDropPose);
 
             }
-            if( vSlider.getCurrentPosition() <= ATC.vSliderSubmHighPose-550 && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
+            if( vSlider.getCurrentPosition() <= ATC.vSliderSubmHighPose-300 && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
                 /*TrajectorySequence trajSeq = drive.trajectorySequenceBuilder(new Pose2d())
                         .back(2)
                         .build();

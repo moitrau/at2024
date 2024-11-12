@@ -22,7 +22,7 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 /*
  * This is an example of a more complex path to really test the tuning.
  */
-@Autonomous(name = "02_AutonBlueAlliance2BlueSamples")
+@Autonomous(name = "03_AutonBlueAlliance2BlueSamples")
 public class AutonBABS2 extends LinearOpMode {
 
 
@@ -168,7 +168,7 @@ public class AutonBABS2 extends LinearOpMode {
         clawArm.setPosition(clawArmHangPose);
         setSlider(vSlider,ATC.vSliderSubmLowPose,750);
 
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-350) {
+        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-300) {
             telemetry.addData("Hang First Specimen vSlider Current Position1", vSlider.getCurrentPosition());
             telemetry.update();
         }
@@ -176,7 +176,7 @@ public class AutonBABS2 extends LinearOpMode {
         clawArm.setPosition(clawArmWallPose);
         clawWrist.setPosition(clawWristDropPose);
 
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-550 ) {
+        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-400 ) {
             telemetry.addData("Hang First Specimen vSlider Current Position2", vSlider.getCurrentPosition());
             telemetry.update();
         }
@@ -229,7 +229,7 @@ public class AutonBABS2 extends LinearOpMode {
         clawArm.setPosition(clawArmHangPose);
         setSlider(vSlider,ATC.vSliderSubmLowPose,750);
 
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-350) {
+        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-300) {
             telemetry.addData("Hang First Specimen vSlider Current Position1", vSlider.getCurrentPosition());
             telemetry.update();
         }
@@ -237,7 +237,7 @@ public class AutonBABS2 extends LinearOpMode {
         clawArm.setPosition(clawArmWallPose);
         clawWrist.setPosition(clawWristDropPose);
 
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-550 ) {
+        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-400 ) {
             telemetry.addData("Hang First Specimen vSlider Current Position2", vSlider.getCurrentPosition());
             telemetry.update();
         }
