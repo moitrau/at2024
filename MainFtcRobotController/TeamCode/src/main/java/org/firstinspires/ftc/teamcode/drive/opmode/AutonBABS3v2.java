@@ -435,13 +435,13 @@ public class AutonBABS3v2 extends LinearOpMode {
 
 // Park
 
-        trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
+  /*      trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
                 .setReversed(false)
                 .lineToLinearHeading(new Pose2d(-54,54,Math.toRadians(90)),
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .build();
-        drive.followTrajectorySequence(trajSequence);
+                .build();*/
+        //drive.followTrajectorySequence(trajSequence);
         clawWrist.setPosition(clawWristWallPose);
     }
 
