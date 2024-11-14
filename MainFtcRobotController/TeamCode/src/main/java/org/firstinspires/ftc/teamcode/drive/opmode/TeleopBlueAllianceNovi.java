@@ -43,6 +43,7 @@ public class TeleopBlueAllianceNovi extends LinearOpMode {
     ATE.HorizontalSliderState hSliderState = ATE.HorizontalSliderState.BASE;
     ATE.VerticalSliderState vSliderState = ATE.VerticalSliderState.BASE;
     ATE.SampleSensorState sampleSensorState = ATE.SampleSensorState.NONE;
+    ATE.SampleSensorState presampleSensorState = ATE.SampleSensorState.NONE;
     ATE.HangerState hangerState = ATE.HangerState.IDLE;
     ATE.OrcaModeState orcaModeState = ATE.OrcaModeState.DISABLED;
 
@@ -61,6 +62,7 @@ public class TeleopBlueAllianceNovi extends LinearOpMode {
     private Servo intakeLW;
     private Servo intakeRW;
     private ColorSensor sampleSensor;
+    private ColorSensor presampleSensor;
     private TouchSensor vtSensor;
     private TouchSensor htSensor;
     private LED led0;
@@ -146,6 +148,7 @@ public class TeleopBlueAllianceNovi extends LinearOpMode {
         htSensor = hardwareMap.get(TouchSensor.class, "htSensor");
         vtSensor = hardwareMap.get(TouchSensor.class, "vtSensor");
         sampleSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+        presampleSensor = hardwareMap.get(ColorSensor.class, "precolorSensor");
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
 //Set Drive Mode
@@ -260,7 +263,7 @@ public class TeleopBlueAllianceNovi extends LinearOpMode {
 
 //Intake-Outtake code for sample starts
             //Below code is to start outtake
-            if ( ((gamepad1.y && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) || sampleSensorState == ATE.SampleSensorState.RED) && hSliderState == ATE.HorizontalSliderState.EXTENDED ) {
+            if ((gamepad1.y && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) || presampleSensorState == ATE.SampleSensorState.RED || (presampleSensorState != ATE.SampleSensorState.NONE && sampleSensorState != ATE.SampleSensorState.NONE && hSliderState == ATE.HorizontalSliderState.EXTENDED)) {
                 intakeLW.setDirection(Servo.Direction.FORWARD);
                 intakeRW.setDirection(Servo.Direction.REVERSE);
                 intakeLW.setPosition(0.9);
@@ -268,7 +271,7 @@ public class TeleopBlueAllianceNovi extends LinearOpMode {
                 sampleSensorState = getSampleSensorState();
                 intakeWrist.setPosition(ATC.intakeWristOuttakePose);
                 //Below if condition is to start intake
-            }else if ((gamepad1.x && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) && sampleSensorState == ATE.SampleSensorState.NONE && hSliderState == ATE.HorizontalSliderState.EXTENDED) {
+            }else if ((gamepad1.x && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) && sampleSensorState == ATE.SampleSensorState.NONE && presampleSensorState != ATE.SampleSensorState.RED && hSliderState == ATE.HorizontalSliderState.EXTENDED) {
                 intakeLW.setDirection(Servo.Direction.REVERSE);
                 intakeRW.setDirection(Servo.Direction.FORWARD);
                 intakeLW.setPosition(0.9);
@@ -291,6 +294,9 @@ public class TeleopBlueAllianceNovi extends LinearOpMode {
 //Sample sensor code starts
             if(sampleSensorState == ATE.SampleSensorState.NONE) {
                 sampleSensorState = getSampleSensorState();
+            }
+            if(presampleSensorState == ATE.SampleSensorState.NONE) {
+                presampleSensorState = getSampleSensorState();
             }
 //Sample sensor code ends
             if(clawArmState == ATE.ClawArmState.PICK_INTAKE && clawWristState == ATE.ClawWristState.PICK_INTAKE && intakeWristState == ATE.IntakeWristState.PICK_INTAKE ) {
@@ -582,9 +588,12 @@ public class TeleopBlueAllianceNovi extends LinearOpMode {
             telemetry.addData("Hook Power:",rightHook.getPower());
             ((NormalizedColorSensor) sampleSensor).setGain(2);
             double distance = ((DistanceSensor) sampleSensor).getDistance(DistanceUnit.CM);
-
             double hue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) sampleSensor).getNormalizedColors().toColor()), 0));
-            telemetry.addData("Hue:",hue);
+            telemetry.addData("Sample Sensor Hue:",hue);
+            ((NormalizedColorSensor) presampleSensor).setGain(2);
+            double predistance = ((DistanceSensor) presampleSensor).getDistance(DistanceUnit.CM);
+            double prehue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) presampleSensor).getNormalizedColors().toColor()), 0));
+            telemetry.addData("PreSample Sensor Hue:",prehue);
             telemetry.update();
             ///////Drive Code////////////
 
