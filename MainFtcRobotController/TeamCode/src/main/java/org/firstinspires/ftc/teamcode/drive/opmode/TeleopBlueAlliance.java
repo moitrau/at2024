@@ -44,7 +44,7 @@ public class TeleopBlueAlliance extends LinearOpMode {
     ATE.VerticalSliderState vSliderState = ATE.VerticalSliderState.BASE;
     ATE.SampleSensorState sampleSensorState = ATE.SampleSensorState.NONE;
     ATE.HangerState hangerState = ATE.HangerState.IDLE;
-    ATE.BotonState botonState = ATE.BotonState.DISABLED;
+    ATE.OrcaModeState botonState = ATE.OrcaModeState.DISABLED;
 
     private DcMotor rightRear;
     private DcMotor rightFront;
@@ -436,7 +436,7 @@ public class TeleopBlueAlliance extends LinearOpMode {
 
             }
 //
-            if(gamepad1.left_trigger > 0.25 && botonState == ATE.BotonState.DISABLED) {
+            if(gamepad1.left_trigger > 0.25 && botonState == ATE.OrcaModeState.DISABLED) {
                 // Initialize Limelight and CalibrationFromLimeLight
                 limelight = hardwareMap.get(Limelight3A.class, "limelight");
                 calibrationFromLimeLight = new CalibrationFromLimeLight();
@@ -489,14 +489,14 @@ public class TeleopBlueAlliance extends LinearOpMode {
 
                     drive.followTrajectorySequence(trajSequence); // Make sure to follow the trajectory sequence
                 //sleep(500000);
-                    botonState = ATE.BotonState.DISABLED;
+                    botonState = ATE.OrcaModeState.DISABLED;
                 }
             }
 
 
             //
 
-            if(gamepad1.right_trigger > 0.25 && botonState == ATE.BotonState.DISABLED) {
+            if(gamepad1.right_trigger > 0.25 && botonState == ATE.OrcaModeState.DISABLED) {
                 // Initialize Limelight and CalibrationFromLimeLight
                 limelight = hardwareMap.get(Limelight3A.class, "limelight");
                 calibrationFromLimeLight = new CalibrationFromLimeLight();
@@ -549,7 +549,7 @@ public class TeleopBlueAlliance extends LinearOpMode {
 
                     drive.followTrajectorySequence(trajSequence); // Make sure to follow the trajectory sequence
                     //sleep(500000);
-                    botonState = ATE.BotonState.DISABLED;
+                    botonState = ATE.OrcaModeState.DISABLED;
                 }
             }
 

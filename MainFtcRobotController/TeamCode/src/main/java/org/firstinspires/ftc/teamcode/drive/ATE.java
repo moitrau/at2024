@@ -65,9 +65,11 @@ public class ATE {
         YELLOW
     };
 
-    public enum BotonState {
+    public enum OrcaModeState {
         DISABLED,
-        TO_OBSV_AREA,
-        TO_SUBM_AREA
+        ERROR,
+        CLIP_SPECIMEN_TO_SUBM,
+        DRIVE_TO_OBSV_AREA,
+        DRIVE_TO_SUBM_AREA
     }
 }

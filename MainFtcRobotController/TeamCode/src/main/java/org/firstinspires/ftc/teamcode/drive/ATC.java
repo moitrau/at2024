@@ -56,7 +56,8 @@ public class ATC {
     public static final double clawMaxTime = 0.5;
     public static final double pickMaxTime = 0.5;
     public static final double dropMaxTime = 0.5;
-    public static final double  outtakeMaxTime = 2.0;
+    public static final double outtakeMaxTime = 2.0;
+    public static final double orcaModeMaxTime = 3.0;
 
 
 }
