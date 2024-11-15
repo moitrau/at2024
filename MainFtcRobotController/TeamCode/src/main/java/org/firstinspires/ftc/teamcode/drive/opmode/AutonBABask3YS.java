@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
  * This is an example of a more complex path to really test the tuning.
  */
 @Autonomous(name = "01_AutonBlueAllianceYellowSample")
-public class AutonBAYS extends LinearOpMode {
+public class AutonBABask3YS extends LinearOpMode {
 
 
     ATE.ClawState clawState = ATE.ClawState.CATCH;

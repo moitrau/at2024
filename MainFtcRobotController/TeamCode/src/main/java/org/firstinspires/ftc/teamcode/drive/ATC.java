@@ -18,7 +18,7 @@ public class ATC {
 
     public static final double clawArmBasePose = 0.55;
     public static final double clawArmIntakePose = 0.95;
-    public static final double clawArmHangPose = 0.45;
+    public static final double clawArmHangPose = 0.42;
     public static final double clawArmDropPose = 0.40;
     public static final double clawArmWallPose = 0.30;
     public static final double clawArmFloorPose = 0.0;
@@ -41,6 +41,7 @@ public class ATC {
     public static final int vSliderBaskHighPose = 3000;
     //public static final int vSliderBaskHighPose = 1750;
     public static final int vSliderBaskLowPose = 1400;
+    public static final int vSliderSpecimenSwipePose = 900;
     public static final int vSliderVelocity=10000;
 
     public static final int hSliderBasePose = 0;

@@ -464,7 +464,7 @@ public class TeleopBlueAlliance extends LinearOpMode {
                 } while (resultCordinates[1] <= 0 && scanCount < maxScans);
 
                 if (resultCordinates[1] > 10) {
-                    botonState = ATE.BotonState.TO_OBSV_AREA;
+                    botonState = ATE.OrcaModeState.DRIVE_TO_OBSV_AREA;
 
                     // Set the starting pose
                     Pose2d startPose = new Pose2d(resultCordinates[0], resultCordinates[1], Math.toRadians(resultCordinates[2]));
@@ -524,7 +524,7 @@ public class TeleopBlueAlliance extends LinearOpMode {
                 } while (resultCordinates[1] <= 0 && scanCount < maxScans);
 
                 if (resultCordinates[1] > 10) {
-                    botonState = ATE.BotonState.TO_SUBM_AREA;
+                    botonState = ATE.OrcaModeState.DRIVE_TO_SUBM_AREA;
 
                     // Set the starting pose
                     Pose2d startPose = new Pose2d(resultCordinates[0], resultCordinates[1], Math.toRadians(resultCordinates[2]));

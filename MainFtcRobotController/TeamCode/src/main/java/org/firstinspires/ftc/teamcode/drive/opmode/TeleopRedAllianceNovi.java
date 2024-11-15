@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.LED;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -31,8 +32,8 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
  * encoder localizer heading may be significantly off if the track width has not been tuned).
  */
 
-@TeleOp(name="01_TeleopBlueAllianceNovi")
-public class TeleopBlueAllianceNovi extends LinearOpMode {
+@TeleOp(name="02_TeleopRedAllianceNovi")
+public class TeleopRedAllianceNovi extends LinearOpMode {
 
 
     ATE.ClawState clawState = ATE.ClawState.CATCH;
@@ -208,9 +209,9 @@ public class TeleopBlueAllianceNovi extends LinearOpMode {
         while(i<100){
             i++;
             llPose = calibrationFromLimeLight.CalibratePoseWithLimelIght();
-            if(llPose[1] > 10.0){
-                rrllDeltaY =  37.0 - llPose[1];
-                rrllDeltaHeading = 90 -llPose[2];
+            if(llPose[1] < -10.0){
+                rrllDeltaY =  -37.0 - llPose[1];
+                rrllDeltaHeading = -90 -llPose[2];
                 Pose2d correctedPose = new Pose2d(0.0, llPose[1] + rrllDeltaY, Math.toRadians(llPose[2] + rrllDeltaHeading));
                 drive.setPoseEstimate(correctedPose);
                 setLedLights(true);
@@ -233,7 +234,7 @@ public class TeleopBlueAllianceNovi extends LinearOpMode {
                 }
                 /* Below lines are to automate activation of grab,catch,pick when the horizontal slider
                 comes back to base touching the sensor after extension when it has yellow or blue sample */
-                if(hSliderState == ATE.HorizontalSliderState.EXTENDED && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
+                if(hSliderState == ATE.HorizontalSliderState.EXTENDED && (sampleSensorState ==ATE.SampleSensorState.RED ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
                     clawArmState = ATE.ClawArmState.PICK_INTAKE;
                     clawWristState = ATE.ClawWristState.PICK_INTAKE;
                     intakeWristState = ATE.IntakeWristState.PICK_INTAKE;
@@ -276,7 +277,7 @@ public class TeleopBlueAllianceNovi extends LinearOpMode {
 
 //Intake-Outtake code for sample starts
             //Below code is to start outtake
-            if ( ((gamepad1.y && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) || sampleSensorState == ATE.SampleSensorState.RED) && hSliderState == ATE.HorizontalSliderState.EXTENDED ) {
+            if ( ((gamepad1.y && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) || sampleSensorState == ATE.SampleSensorState.BLUE) && hSliderState == ATE.HorizontalSliderState.EXTENDED ) {
                 intakeLW.setDirection(Servo.Direction.FORWARD);
                 intakeRW.setDirection(Servo.Direction.REVERSE);
                 intakeLW.setPosition(0.9);
@@ -290,7 +291,7 @@ public class TeleopBlueAllianceNovi extends LinearOpMode {
                 intakeLW.setPosition(0.9);
                 intakeRW.setPosition(0.9);
                 intakeWrist.setPosition(ATC.intakeWristIntakePose);
-            }else if ((sampleSensorState == ATE.SampleSensorState.YELLOW || sampleSensorState == ATE.SampleSensorState.BLUE ) && hSliderState == ATE.HorizontalSliderState.EXTENDED){
+            }else if ((sampleSensorState == ATE.SampleSensorState.YELLOW || sampleSensorState == ATE.SampleSensorState.RED ) && hSliderState == ATE.HorizontalSliderState.EXTENDED){
                 hSlider.setPower(-1);
                 intakeLW.setPosition(0.5);
                 intakeRW.setPosition(0.5);
@@ -350,15 +351,15 @@ public class TeleopBlueAllianceNovi extends LinearOpMode {
 //Intake-Outtake code for sample ends
 
 //Basket Drop Code Starts
-            if( gamepad2.dpad_up && gamepad2.x && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
+            if( gamepad2.dpad_up && gamepad2.x && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.RED ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
                 setSlider(vSlider,vSliderBaskHighPose,vSliderVelocity);
                 vSliderState = ATE.VerticalSliderState.EXTENDED;
             }
-            if( gamepad2.dpad_down && gamepad2.x && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
+            if( gamepad2.dpad_down && gamepad2.x && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.RED ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
                 setSlider(vSlider,vSliderBaskLowPose,vSliderVelocity);
                 vSliderState = ATE.VerticalSliderState.EXTENDED;
             }
-            if( gamepad2.y && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
+            if( gamepad2.y && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.RED ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
                 clawWristState = ATE.ClawWristState.DROP;
                 clawArmState = ATE.ClawArmState.DROP;
                 sampleSensorState = ATE.SampleSensorState.NONE;
@@ -471,7 +472,7 @@ public class TeleopBlueAllianceNovi extends LinearOpMode {
                 llPose = calibrationFromLimeLight.CalibratePoseWithLimelIght();
                 ledBlinkerVar = !ledBlinkerVar;
                 setLedLights(ledBlinkerVar);
-                if(llPose[0] > -10.0 && llPose[0] < 10.0 && llPose[1] > 48.0  && rrllDeltaY != 0.0) {
+                if(llPose[0] > -10.0 && llPose[0] < 10.0 && llPose[1] < -48.0  && rrllDeltaY != 0.0) {
                     setLedLights(true);
                     Pose2d correctedPose = new Pose2d(drive.getPoseEstimate().getX(), llPose[1] + rrllDeltaY, Math.toRadians(llPose[2] + rrllDeltaHeading));
                     drive.setPoseEstimate(correctedPose);
@@ -482,7 +483,7 @@ public class TeleopBlueAllianceNovi extends LinearOpMode {
                     vSliderTimer.startTimer();
                     TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(correctedPose)
                             .setReversed(false)
-                            .lineToLinearHeading(new Pose2d(drive.getPoseEstimate().getX(), 37, Math.toRadians(90)))
+                            .lineToLinearHeading(new Pose2d(drive.getPoseEstimate().getX(), -37, Math.toRadians(-90)))
                             .build();
                     drive.followTrajectorySequence(trajSequence);
 
@@ -508,7 +509,7 @@ public class TeleopBlueAllianceNovi extends LinearOpMode {
                 ///drive.breakFollowing();
             }
 
-            if(gamepad1.left_trigger > 0.7 && drive.getPoseEstimate().getY() > 39 && drive.getPoseEstimate().getX() < -45 ){
+            if(gamepad1.left_trigger > 0.7 && drive.getPoseEstimate().getY() < -39 && drive.getPoseEstimate().getX() > 45 ){
                 setLedLights(true);
                 claw.setPosition(clawCatchTightPose);
                 sleep(500);
@@ -517,17 +518,17 @@ public class TeleopBlueAllianceNovi extends LinearOpMode {
                 setSlider(vSlider,ATC.vSliderWallLiftPose,vSliderVelocity);
                 clawWristState = ATE.ClawWristState.BASE;
                 TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .lineToLinearHeading(new Pose2d(0,46,Math.toRadians(90)),
+                        .lineToLinearHeading(new Pose2d(0,-46,Math.toRadians(-90)),
                                 SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                                 SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                         .build();
                 drive.followTrajectorySequence(trajSequence);
 
             }
-            if(gamepad1.right_trigger > 0.7 && drive.getPoseEstimate().getX() > -12 && drive.getPoseEstimate().getX() < 12 && drive.getPoseEstimate().getY() > 35 && drive.getPoseEstimate().getY() < 44  ){
+            if(gamepad1.right_trigger > 0.7 && drive.getPoseEstimate().getX() > -12 && drive.getPoseEstimate().getX() < 12 && drive.getPoseEstimate().getY() < -35 && drive.getPoseEstimate().getY() > -44  ){
                 setLedLights(true);
                 TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .lineToLinearHeading(new Pose2d(-50,42,Math.toRadians(-90)),
+                        .lineToLinearHeading(new Pose2d(50,-42,Math.toRadians(90)),
                                 SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                                 SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                         .addDisplacementMarker(40, () -> {

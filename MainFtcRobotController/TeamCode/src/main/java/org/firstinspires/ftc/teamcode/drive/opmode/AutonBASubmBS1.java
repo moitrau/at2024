@@ -23,8 +23,8 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 /*
  * This is an example of a more complex path to really test the tuning.
  */
-@Autonomous(name = "02_AutonBlueAlliance1BlueSamples")
-public class AutonBABS1 extends LinearOpMode {
+@Autonomous(name = "01_BlueSpecimens1Blue")
+public class AutonBASubmBS1 extends LinearOpMode {
 
 
     ATE.ClawState clawState = ATE.ClawState.CATCH;
@@ -154,7 +154,7 @@ public class AutonBABS1 extends LinearOpMode {
 //Hang first blue Start
         TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(startPose).setReversed(true)
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(-9,37.5,Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(-9,37,Math.toRadians(90)))
                 .addDisplacementMarker(1, () -> {
                     setSlider(vSlider, vSliderSubmHighPose, vSliderVelocity);
                     claw.setPosition(clawCatchTightPose);
