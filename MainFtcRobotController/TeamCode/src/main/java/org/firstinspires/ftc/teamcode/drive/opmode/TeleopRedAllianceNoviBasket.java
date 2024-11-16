@@ -2,13 +2,13 @@ package org.firstinspires.ftc.teamcode.drive.opmode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.LED;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -30,9 +30,9 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
  * exercise is to ascertain whether the localizer has been configured properly (note: the pure
  * encoder localizer heading may be significantly off if the track width has not been tuned).
  */
-@Disabled
-@TeleOp(name="01_TeleopBlueAllianceLoop")
-public class TeleopBlueAllianceV1 extends LinearOpMode {
+
+@TeleOp(name="03_TeleopRedAllianceNoviBasket")
+public class TeleopRedAllianceNoviBasket extends LinearOpMode {
 
 
     ATE.ClawState clawState = ATE.ClawState.CATCH;
@@ -43,8 +43,9 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
     ATE.HorizontalSliderState hSliderState = ATE.HorizontalSliderState.BASE;
     ATE.VerticalSliderState vSliderState = ATE.VerticalSliderState.BASE;
     ATE.SampleSensorState sampleSensorState = ATE.SampleSensorState.NONE;
+    ATE.SampleSensorState presampleSensorState = ATE.SampleSensorState.NONE;
     ATE.HangerState hangerState = ATE.HangerState.IDLE;
-    ATE.OrcaModeState botonState = ATE.OrcaModeState.DISABLED;
+    ATE.OrcaModeState orcaModeState = ATE.OrcaModeState.DISABLED;
 
     private DcMotor rightRear;
     private DcMotor rightFront;
@@ -61,9 +62,13 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
     private Servo intakeLW;
     private Servo intakeRW;
     private ColorSensor sampleSensor;
+    private ColorSensor presampleSensor;
     private TouchSensor vtSensor;
     private TouchSensor htSensor;
-
+    private LED led0;
+    private LED led1;
+    private LED led2;
+    private LED led3;
     private Limelight3A limelight;
     private CalibrationFromLimeLight calibrationFromLimeLight;
 
@@ -105,17 +110,23 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
 
     private double intakeWristTimer = 0;
     private double hSliderTimer = 0;
-    private double vSliderTimer = 0;
+    private double vSliderTimerOld = 0;
+
 
     ATRoboTimer consumeTimer = new ATRoboTimer();
     ATRoboTimer clawTimer = new ATRoboTimer();
     ATRoboTimer grabTimer = new ATRoboTimer();
     ATRoboTimer pickTimer = new ATRoboTimer();
     ATRoboTimer dropTimer = new ATRoboTimer();
-    ATRoboTimer outtakeTimer = new ATRoboTimer();
+    ATRoboTimer intakeTimer = new ATRoboTimer();
+    ATRoboTimer orcaModeTimer = new ATRoboTimer();
+    ATRoboTimer vSliderTimer = new ATRoboTimer();
 
+    double[] llPose;
     double rrllDeltaY = 0.0;
     double rrllDeltaHeading = 0.0;
+
+    boolean ledBlinkerVar = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -141,27 +152,34 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
         htSensor = hardwareMap.get(TouchSensor.class, "htSensor");
         vtSensor = hardwareMap.get(TouchSensor.class, "vtSensor");
         sampleSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+        presampleSensor = hardwareMap.get(ColorSensor.class, "precolorSensor");
+        led0 = hardwareMap.get(LED.class, "led0");
+        led1 = hardwareMap.get(LED.class, "led1");
+        led2 = hardwareMap.get(LED.class, "led2");
+        led3 = hardwareMap.get(LED.class, "led3");
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
 //Set Drive Mode
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 //Initialize Poses
+
+        intakeWrist.setPosition(intakeWristConsumePose);
         claw.setPosition(clawCatchTightPose);
-        clawArm.setPosition(clawArmBasePose);
-        clawWrist.setPosition(clawWristBasePose);
         intakeLW.setPosition(intakeWheelHaltPose);
         intakeRW.setPosition(intakeWheelHaltPose);
+        clawArm.setPosition(clawArmBasePose);
+        sleep(1000);
         intakeWrist.setPosition(intakeWristBasePose);
-        sleep(500);
-
-        vSliderTimer = resetTimer();
-        vSliderTimer = startTimer();
+        clawWrist.setPosition(clawWristBasePose);
+        setLedLights(false);
+        vSliderTimerOld = resetTimer();
+        vSliderTimerOld = startTimer();
 
         vSlider.setDirection(DcMotor.Direction.REVERSE);
-        while((!vtSensor.isPressed()) && elapsedTime(vSliderTimer) <= ATC.vSliderMaxTime){
+        while((!vtSensor.isPressed()) && elapsedTime(vSliderTimerOld) <= ATC.vSliderMaxTime){
             vSlider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             telemetry.addData("MaxTimer", ATC.vSliderMaxTime);
-            telemetry.addData("VTimer", elapsedTime(vSliderTimer));
+            telemetry.addData("VTimer", elapsedTime(vSliderTimerOld));
             telemetry.update();
             vSlider.setPower(-1);
         }
@@ -184,19 +202,6 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
         hSlider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
-        calibrationFromLimeLight = new CalibrationFromLimeLight();
-        calibrationFromLimeLight.LimeLight3A(0, 0, 0, 0.5, hardwareMap);
-        int i = 0;
-        double[] resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIght();
-        while(i<100){
-            i++;
-            resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIght();
-            if(resultCordinates[1] > 10.0){
-                break;
-            }
-        }
-        rrllDeltaY =  37.0 - resultCordinates[1];
-        rrllDeltaHeading = 90 -resultCordinates[2];
 
 //Wait till Play button is clicked on DriverHub
         waitForStart();
@@ -212,7 +217,7 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
                 }
                 /* Below lines are to automate activation of grab,catch,pick when the horizontal slider
                 comes back to base touching the sensor after extension when it has yellow or blue sample */
-                if(hSliderState == ATE.HorizontalSliderState.EXTENDED && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
+                if(hSliderState == ATE.HorizontalSliderState.EXTENDED && (sampleSensorState ==ATE.SampleSensorState.RED ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
                     clawArmState = ATE.ClawArmState.PICK_INTAKE;
                     clawWristState = ATE.ClawWristState.PICK_INTAKE;
                     intakeWristState = ATE.IntakeWristState.PICK_INTAKE;
@@ -253,15 +258,14 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
                 }
             }
 
-
 //Intake-Outtake code for sample starts
             //Below code is to start outtake
-            if ( ((gamepad1.y && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) || sampleSensorState == ATE.SampleSensorState.RED) && hSliderState == ATE.HorizontalSliderState.EXTENDED ) {
+            if ( ((gamepad1.y && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) || sampleSensorState == ATE.SampleSensorState.BLUE) && hSliderState == ATE.HorizontalSliderState.EXTENDED ) {
                 intakeLW.setDirection(Servo.Direction.FORWARD);
                 intakeRW.setDirection(Servo.Direction.REVERSE);
                 intakeLW.setPosition(0.9);
                 intakeRW.setPosition(0.9);
-                sampleSensorState = getSampleSensorState();
+                sampleSensorState = getSampleSensorState(sampleSensor);
                 intakeWrist.setPosition(ATC.intakeWristOuttakePose);
                 //Below if condition is to start intake
             }else if ((gamepad1.x && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) && sampleSensorState == ATE.SampleSensorState.NONE && hSliderState == ATE.HorizontalSliderState.EXTENDED) {
@@ -270,7 +274,7 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
                 intakeLW.setPosition(0.9);
                 intakeRW.setPosition(0.9);
                 intakeWrist.setPosition(ATC.intakeWristIntakePose);
-            }else if ((sampleSensorState == ATE.SampleSensorState.YELLOW || sampleSensorState == ATE.SampleSensorState.BLUE ) && hSliderState == ATE.HorizontalSliderState.EXTENDED){
+            }else if ((sampleSensorState == ATE.SampleSensorState.YELLOW || sampleSensorState == ATE.SampleSensorState.RED ) && hSliderState == ATE.HorizontalSliderState.EXTENDED){
                 hSlider.setPower(-1);
                 intakeLW.setPosition(0.5);
                 intakeRW.setPosition(0.5);
@@ -283,10 +287,12 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
 
 //Sample sensor code starts
             if(sampleSensorState == ATE.SampleSensorState.NONE) {
-                sampleSensorState = getSampleSensorState();
+                sampleSensorState = getSampleSensorState(sampleSensor);
             }
+            //if(presampleSensorState == ATE.SampleSensorState.NONE) {
+            //    presampleSensorState = getSampleSensorState(sampleSensor);
+            //}
 //Sample sensor code ends
-
             if(clawArmState == ATE.ClawArmState.PICK_INTAKE && clawWristState == ATE.ClawWristState.PICK_INTAKE && intakeWristState == ATE.IntakeWristState.PICK_INTAKE ) {
                 if(consumeTimer.isActive) {
                     intakeWrist.setPosition(ATC.intakeWristConsumePose);
@@ -327,18 +333,16 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
 
 //Intake-Outtake code for sample ends
 
-
-
 //Basket Drop Code Starts
-            if( gamepad2.dpad_up && gamepad2.x && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
+            if( gamepad2.dpad_up && gamepad2.x && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.RED ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
                 setSlider(vSlider,vSliderBaskHighPose,vSliderVelocity);
                 vSliderState = ATE.VerticalSliderState.EXTENDED;
             }
-            if( gamepad2.dpad_down && gamepad2.x && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
+            if( gamepad2.dpad_down && gamepad2.x && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.RED ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
                 setSlider(vSlider,vSliderBaskLowPose,vSliderVelocity);
                 vSliderState = ATE.VerticalSliderState.EXTENDED;
             }
-            if( gamepad2.y && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.BLUE ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
+            if( gamepad2.y && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && (sampleSensorState ==ATE.SampleSensorState.RED ||sampleSensorState ==ATE.SampleSensorState.YELLOW )){
                 clawWristState = ATE.ClawWristState.DROP;
                 clawArmState = ATE.ClawArmState.DROP;
                 sampleSensorState = ATE.SampleSensorState.NONE;
@@ -382,6 +386,26 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
                 claw.setPosition(clawReleasePose);
                 clawWristState = ATE.ClawWristState.PICK_FLOOR;
             }
+
+            if(gamepad1.dpad_up && gamepad1.left_bumper ){
+                claw.setPosition(clawCatchTightPose);
+                clawWrist.setPosition(clawWristHangPose);
+                clawArm.setPosition(clawArmHangPose);
+                setSlider(vSlider,ATC.vSliderSpecimenSwipePose,vSliderVelocity);
+                vSliderState = ATE.VerticalSliderState.SPECIMEN_SWIPE;
+            }
+            if(gamepad1.dpad_down && gamepad1.left_bumper ){
+                clawArm.setPosition(clawArmBasePose);
+                clawWrist.setPosition(clawWristBasePose);
+                clawWristState = ATE.ClawWristState.BASE;
+                clawArmState = ATE.ClawArmState.BASE;
+                vSlider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                vSliderState = ATE.VerticalSliderState.EXTENDED;
+                vSlider.setPower(-1);
+            }
+
+
+
             if(gamepad1.b && sampleSensorState == ATE.SampleSensorState.NONE && ( clawWristState == ATE.ClawWristState.PICK_FLOOR || clawWristState == ATE.ClawWristState.PICK_WALL ) && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
                 claw.setPosition(clawCatchTightPose);
                 sleep(500);
@@ -389,18 +413,9 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
                 clawArm.setPosition(clawArmBasePose);
                 setSlider(vSlider,ATC.vSliderWallLiftPose,vSliderVelocity);
                 clawWristState = ATE.ClawWristState.BASE;
-               // Pose2d startPose = new Pose2d(0.0, 0.0, Math.toRadians(0.0));
-               // drive.setPoseEstimate(startPose);
-               // TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(startPose)
-               //         .turn(Math.toRadians(-90))
-               //         .build();
-
-               // drive.followTrajectorySequence(trajSequence);
-
 
             }
-
-
+            
             if(gamepad2.a && sampleSensorState == ATE.SampleSensorState.NONE && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
                 claw.setPosition(clawCatchTightPose);
                 clawWrist.setPosition(clawWristHangPose);
@@ -409,6 +424,7 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
                 vSliderState = ATE.VerticalSliderState.SUBM_HIGH;
                 clawWristState = ATE.ClawWristState.HANG;
             }
+
 
             if(gamepad2.b && sampleSensorState == ATE.SampleSensorState.NONE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_HIGH ){
                 claw.setPosition(clawCatchTightPose);
@@ -419,32 +435,107 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
                 //clawWrist.getController().pwmDisable();
                 clawArmState = ATE.ClawArmState.HANG;
             }
+/*
+            if(gamepad2.left_trigger > 0.7 && orcaModeState == ATE.OrcaModeState.DISABLED) {
+                orcaModeState = ATE.OrcaModeState.CLIP_SPECIMEN_TO_SUBM;
+                orcaModeTimer.startTimer();
+            }
+            if (orcaModeTimer.isActive) {
+                if (orcaModeTimer.elapsedTime() >= ATC.orcaModeMaxTime){
+                    orcaModeTimer.stopTimer();
+                    setLedLights(false);
+                    orcaModeState = ATE.OrcaModeState.DISABLED;
+                }
+            }
+            if(orcaModeState == ATE.OrcaModeState.CLIP_SPECIMEN_TO_SUBM && orcaModeTimer.elapsedTime() <= ATC.orcaModeMaxTime){
+
+                calibrationFromLimeLight = new CalibrationFromLimeLight();
+                calibrationFromLimeLight.LimeLight3A(0, 0, 0, 0.5, hardwareMap);
+
+                llPose = calibrationFromLimeLight.CalibratePoseWithLimelIght();
+                ledBlinkerVar = !ledBlinkerVar;
+                setLedLights(ledBlinkerVar);
+                if(llPose[0] > -10.0 && llPose[0] < 10.0 && llPose[1] < -48.0  && rrllDeltaY != 0.0) {
+                    setLedLights(true);
+                    Pose2d correctedPose = new Pose2d(drive.getPoseEstimate().getX(), llPose[1] + rrllDeltaY, Math.toRadians(llPose[2] + rrllDeltaHeading));
+                    drive.setPoseEstimate(correctedPose);
+                    setSlider(vSlider, vSliderSubmHighPose + 50, vSliderVelocity);
+                    claw.setPosition(clawCatchTightPose);
+                    clawWrist.setPosition(clawWristHangPose);
+                    clawArm.setPosition(clawArmHangPose);
+                    vSliderTimer.startTimer();
+                    TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(correctedPose)
+                            .setReversed(false)
+                            .lineToLinearHeading(new Pose2d(drive.getPoseEstimate().getX(), -37, Math.toRadians(-90)))
+                            .build();
+                    drive.followTrajectorySequence(trajSequence);
+
+                    while (vSlider.getCurrentPosition() < ATC.vSliderSubmHighPose-10) {
+                        if (vSliderTimer.isActive) {
+                            if (vSliderTimer.elapsedTime() >= 3){
+                                vSliderTimer.stopTimer();
+                                break;
+                            }
+                        }
+                    }
+                    claw.setPosition(clawCatchTightPose);
+                    clawWrist.setPosition(clawWristHangPose);
+                    clawArm.setPosition(clawArmHangPose);
+                    setSlider(vSlider, ATC.vSliderSubmLowPose, 750);
+                    vSliderState = ATE.VerticalSliderState.SUBM_LOW;
+                    clawArmState = ATE.ClawArmState.HANG;
+                    setLedLights(false);
+                    orcaModeState = ATE.OrcaModeState.DISABLED;
+                }
+            }
+            if(gamepad2.right_trigger > 0.7 ){
+                ///drive.breakFollowing();
+            }
+
+            if(gamepad1.left_trigger > 0.7 && drive.getPoseEstimate().getY() < -39 && drive.getPoseEstimate().getX() > 45 ){
+                setLedLights(true);
+                claw.setPosition(clawCatchTightPose);
+                sleep(500);
+                clawWrist.setPosition(clawWristBasePose);
+                clawArm.setPosition(clawArmBasePose);
+                setSlider(vSlider,ATC.vSliderWallLiftPose,vSliderVelocity);
+                clawWristState = ATE.ClawWristState.BASE;
+                TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                        .lineToLinearHeading(new Pose2d(0,-46,Math.toRadians(-90)),
+                                SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                                SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                        .build();
+                drive.followTrajectorySequence(trajSequence);
+
+            }
+            if(gamepad1.right_trigger > 0.7 && drive.getPoseEstimate().getX() > -12 && drive.getPoseEstimate().getX() < 12 && drive.getPoseEstimate().getY() < -35 && drive.getPoseEstimate().getY() > -44  ){
+                setLedLights(true);
+                TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                        .lineToLinearHeading(new Pose2d(50,-42,Math.toRadians(90)),
+                                SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                                SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                        .addDisplacementMarker(40, () -> {
+                            clawArm.setPosition(ATC.clawArmFloorPose);
+                            clawWrist.setPosition(ATC.clawWristFloorPose);
+                            claw.setPosition(clawReleasePose);
+                            clawWristState = ATE.ClawWristState.PICK_FLOOR;
+                        })
+                        .build();
+                drive.followTrajectorySequence(trajSequence);
+                setLedLights(false);
+
+            }
+*/
+
             if( vSlider.getCurrentPosition() <= ATC.vSliderSubmHighPose-200  && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
                 clawArm.setPosition(clawArmWallPose);
                 clawWrist.setPosition(clawWristDropPose);
 
             }
+            
             if( vSlider.getCurrentPosition() <= ATC.vSliderSubmHighPose-300 && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
-                /*TrajectorySequence trajSeq = drive.trajectorySequenceBuilder(new Pose2d())
-                        .back(2)
-                        .build();
-                drive.followTrajectorySequence(trajSeq);
-                */
-
-                //sleep(5000);
-                //claw.setPosition(clawCatchTightPose+0.05);
-                //clawArm.setPosition(clawArmWallPose);
-                // clawWrist.setPosition(clawWristWallPose);
-
-                //sleep(5);
                 claw.setPosition(clawReleasePose);
-                //sleep(1000);
-                //clawArm.setPosition(clawArmBasePose);
-                //clawWrist.setPosition(clawWristBasePose);
-                //clawWristState = ATE.ClawWristState.BASE;
-                //clawArmState = ATE.ClawArmState.BASE;
                 vSlider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                //telemetry.update();
                 vSliderState = ATE.VerticalSliderState.EXTENDED;
                 vSlider.setPower(-1);
                 clawArm.setPosition(clawArmBasePose);
@@ -453,209 +544,12 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
                 clawArmState = ATE.ClawArmState.BASE;
 
             }
-//
-            // Declare an array of 7 predetermined X coordinates
-            double[] xCoordinates = {9.0, 6.0, 3.0, 0.0, -3.0, -6.0, -9.0};
-            int currentXIndex = 0;
-
-            /*if (gamepad1.left_trigger > 0.25 && botonState == ATE.BotonState.DISABLED) {
-                // Initialize Limelight and CalibrationFromLimeLight
-                limelight = hardwareMap.get(Limelight3A.class, "limelight");
-                calibrationFromLimeLight = new CalibrationFromLimeLight();
-
-                // Set the initial coordinates and margin of error
-                calibrationFromLimeLight.LimeLight3A(0, 0, 0, 0.5, hardwareMap);
-
-                double[] resultCordinates;
-                int scanCount = 0;
-                int maxScans = 3;
-
-                // Loop until y > 0 or the maximum number of scans is reached
-                do {
-                    resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIght();
-                    scanCount++;
-
-                    // Display Y coordinate in telemetry for each scan
-                    telemetry.addData("Scan Count", scanCount);
-                    telemetry.addData("X Coordinate", resultCordinates[0]);
-                    telemetry.addData("Y Coordinate", resultCordinates[1]);
-                    telemetry.addData("Heading", resultCordinates[2]);
-                    telemetry.update();
-
-                    sleep(100); // Adding a short delay between scans
-                } while (resultCordinates[1] <= 0 && scanCount < maxScans);
-
-                if (resultCordinates[1] > 10) {
-                    botonState = ATE.BotonState.TO_OBSV_AREA;
-
-                    // Set the starting pose using the current X coordinate from the array
-                    Pose2d startPose = new Pose2d(new Pose2d(0,37,Math.toRadians(90)));
-                   // Pose2d startPose = new Pose2d(resultCordinates[0], resultCordinates[1], Math.toRadians(resultCordinates[2]));
-                    drive.setPoseEstimate(startPose);
-
-                    telemetry.addData("Drive X Coordinate", drive.getPoseEstimate().getX());
-                    telemetry.addData("Drive Y Coordinate", drive.getPoseEstimate().getY());
-                    telemetry.addData("Drive Heading", Math.toDegrees(drive.getPoseEstimate().getHeading()));
-                    telemetry.addData("xCoordinates[currentXIndex]", xCoordinates[currentXIndex]);
-
-                    telemetry.update();
-
-                    // Build and follow trajectory sequence
-                    TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(startPose)
-                            .setReversed(true)
-                            .lineToLinearHeading(new Pose2d(xCoordinates[currentXIndex],37,Math.toRadians(90)))
-                            //.setReversed(false)
-                            //.splineToLinearHeading(new Pose2d(-48, 48, Math.toRadians(-90)), Math.toRadians(60),
-                                    //SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                                   // SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                           // .splineToLinearHeading(new Pose2d(-0,56,Math.toRadians(90)),Math.toRadians(-60),
-                                   // SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                                   // SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                            .build();
-
-                    drive.followTrajectorySequence(trajSequence); // Make sure to follow the trajectory sequence
-                    botonState = ATE.BotonState.DISABLED;
-                }
-
-                // Increment the X coordinate index for the next trigger press
-                currentXIndex = (currentXIndex + 1) % xCoordinates.length; // Cycle through the array
-            }
-*/
-
-            if(gamepad1.right_trigger > 0.25 && botonState == ATE.OrcaModeState.DISABLED) {
-
-                calibrationFromLimeLight = new CalibrationFromLimeLight();
-                calibrationFromLimeLight.LimeLight3A(0, 0, 0, 0.5, hardwareMap);
-                i = 0;
-                resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIght();
-                while(i<100){
-                    i++;
-                    resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIght();
-                    if(resultCordinates[1] > 10.0){
-                        break;
-                    }
-                }
-                telemetry.addData("resultCordinates[1]",resultCordinates[1]);
-                telemetry.addData("resultCordinates[2]",resultCordinates[2]);
-
-                Pose2d correctedPose = new Pose2d(drive.getPoseEstimate().getX(),resultCordinates[1]+rrllDeltaY,Math.toRadians(resultCordinates[2]+rrllDeltaHeading));
-                drive.setPoseEstimate(correctedPose);
-
-                telemetry.addData("X",drive.getPoseEstimate().getX());
-                telemetry.addData("Y",drive.getPoseEstimate().getY());
-                telemetry.addData("Heading",Math.toDegrees(drive.getPoseEstimate().getHeading()));
-
-                TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(correctedPose)
-                        .setReversed(false)
-                        .lineToLinearHeading(new Pose2d(drive.getPoseEstimate().getX(),37,Math.toRadians(90)))
-                        .addDisplacementMarker(1, () -> {
-                            setSlider(vSlider, vSliderSubmHighPose+50, vSliderVelocity);
-                            claw.setPosition(clawCatchTightPose);
-                            clawWrist.setPosition(clawWristHangPose);
-                            clawArm.setPosition(clawArmHangPose);
-                        })
-                        .build();
-                drive.followTrajectorySequence(trajSequence);
 
 
-                claw.setPosition(clawCatchTightPose);
-                clawWrist.setPosition(clawWristHangPose);
-                clawArm.setPosition(clawArmHangPose);
-                setSlider(vSlider,ATC.vSliderSubmLowPose,750);
-                vSliderState = ATE.VerticalSliderState.SUBM_LOW;
-                //clawWrist.getController().pwmDisable();
-                clawArmState = ATE.ClawArmState.HANG;
-
-            }
-
-
-
-            //
-
-            /*if(gamepad1.right_trigger > 0.25 && botonState == ATE.BotonState.DISABLED) {
-                // Initialize Limelight and CalibrationFromLimeLight
-                limelight = hardwareMap.get(Limelight3A.class, "limelight");
-                calibrationFromLimeLight = new CalibrationFromLimeLight();
-
-                // Set the initial coordinates and margin of error
-                calibrationFromLimeLight.LimeLight3A(0, 0, 0, 0.5, hardwareMap);
-
-                double[] resultCordinates;
-                int scanCount = 0;
-                int maxScans = 3;
-
-                // Loop until y > 0 or the maximum number of scans is reached
-                do {
-                    resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIght();
-                    scanCount++;
-
-                    // Display Y coordinate in telemetry for each scan
-                    telemetry.addData("Scan Count", scanCount);
-                    telemetry.addData("x Coordinate", resultCordinates[0]);
-                    telemetry.addData("Y Coordinate", resultCordinates[1]);
-                    telemetry.addData("Heading", resultCordinates[2]);
-
-
-                    sleep(100); // Adding a short delay between scans
-                } while (resultCordinates[1] <= 0 && scanCount < maxScans);
-
-                if (resultCordinates[1] > 10) {
-                    botonState = ATE.BotonState.TO_SUBM_AREA;
-
-                    // Set the starting pose
-                    Pose2d startPose = new Pose2d(resultCordinates[0], resultCordinates[1], Math.toRadians(resultCordinates[2]));
-                    drive.setPoseEstimate(startPose);
-
-                    telemetry.addData("Drive x Coordinate", drive.getPoseEstimate().getX());
-                    telemetry.addData("Drive Y Coordinate", drive.getPoseEstimate().getY());
-                    telemetry.addData("Drive Heading", Math.toDegrees(drive.getPoseEstimate().getHeading()));
-                    telemetry.update();
-
-
-                    //sleep(5000);
-
-                    // Build and follow trajectory sequence
-                    TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(startPose)
-                            .setReversed(true)
-                            .splineToLinearHeading(new Pose2d(-3, 40,Math.toRadians(90)), Math.toRadians(-90),
-                                    SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                                    SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-
-                            .build();
-
-                    drive.followTrajectorySequence(trajSequence); // Make sure to follow the trajectory sequence
-                    //sleep(500000);
-                    botonState = ATE.BotonState.DISABLED;
-                }
-            }/*
-
-
-
-/*
-            if(gamepad2.right_bumper && gamepad2.y && clawWristState == ATE.ClawWristState.PICK_WALL && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE && sampleSensorState == ATE.SampleSensorState.NONE ){
-                claw.setPosition(clawCatchTightPose);
-                clawArm.setPosition(clawArmBasePose);
-                clawWrist.setPosition(clawWristBasePose);
-                clawWristState = ATE.ClawWristState.BASE;
-            }
-
-            if(gamepad2.right_bumper && gamepad2.b && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.EXTENDED && sampleSensorState == ATE.SampleSensorState.NONE ){
-                clawArm.setPosition(clawArmHangPose);
-                clawWrist.setPosition(clawWristHangPose);
-                clawWristState = ATE.ClawWristState.HANG;
-            }
-
-            if(gamepad2.right_bumper && gamepad2.a && clawWristState == ATE.ClawWristState.HANG && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.EXTENDED && sampleSensorState == ATE.SampleSensorState.NONE ){
-                claw.setPosition(clawReleasePose);
-                clawWrist.setPosition(clawWristBasePose);
-                clawArm.setPosition(clawArmBasePose);
-                claw.setPosition(clawCatchTightPose);
-                clawWristState = ATE.ClawWristState.BASE;
-            }
 //Specimen code ends
-*/
+
 //Code to hang onto submersible starts
-            if (gamepad2.right_bumper && hangerState == ATE.HangerState.IDLE) {
+            if (gamepad2.dpad_up && gamepad2.right_bumper && hangerState == ATE.HangerState.IDLE) {
                 hangerState = ATE.HangerState.ACTIVE;
                 hSlider.setPower(0);
                 vSlider.setPower(0);
@@ -673,7 +567,7 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
                 clawArm.getController().pwmDisable();
             }
 
-            if (gamepad2.left_bumper && hangerState == ATE.HangerState.ACTIVE) {
+            if (gamepad2.dpad_up && gamepad2.left_bumper && hangerState == ATE.HangerState.ACTIVE) {
                 hangerState = ATE.HangerState.IDLE;
                 leftHook.setPower(0);
                 rightHook.setPower(0);
@@ -687,7 +581,10 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
             }
 //Code to hang onto submersible ends
 
-
+            telemetry.addData("Roadrunner X",drive.getPoseEstimate().getX());
+            telemetry.addData("Roadrunner Y",drive.getPoseEstimate().getY());
+            telemetry.addData("Roadrunner Heading",Math.toDegrees(drive.getPoseEstimate().getHeading()));
+            telemetry.addData("claw state", orcaModeState);
             telemetry.addData("claw state", clawState);
             telemetry.addData("clawWrist state", clawWristState);
             telemetry.addData("clawArm state", clawArmState);
@@ -710,14 +607,16 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
             telemetry.addData("Hook Power:",rightHook.getPower());
             ((NormalizedColorSensor) sampleSensor).setGain(2);
             double distance = ((DistanceSensor) sampleSensor).getDistance(DistanceUnit.CM);
-
             double hue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) sampleSensor).getNormalizedColors().toColor()), 0));
-            telemetry.addData("Hue:",hue);
+            telemetry.addData("Sample Sensor Hue:",hue);
+            //((NormalizedColorSensor) presampleSensor).setGain(2);
+            //double predistance = ((DistanceSensor) presampleSensor).getDistance(DistanceUnit.CM);
+            //double prehue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) presampleSensor).getNormalizedColors().toColor()), 0));
+            //telemetry.addData("PreSample Sensor Hue:",prehue);
             telemetry.update();
             ///////Drive Code////////////
 
-
-            if(gamepad1.left_bumper){
+            if(gamepad1.left_bumper ||  vSliderState == ATE.VerticalSliderState.SUBM_HIGH || clawWristState == ATE.ClawWristState.PICK_FLOOR){
                 drive.setWeightedDrivePower(
                         new Pose2d(
                                 -gamepad1.left_stick_y/4,
@@ -747,6 +646,7 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
                 hSliderState = ATE.HorizontalSliderState.BASE;
                 vSliderState = ATE.VerticalSliderState.BASE;
                 sampleSensorState = ATE.SampleSensorState.NONE;
+                //presampleSensorState = ATE.SampleSensorState.NONE;
                 clawWrist.setPosition(clawWristDropPose);
                 clawArm.setPosition(clawArmDropPose);
                 sleep(500);
@@ -760,13 +660,13 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
                 intakeWrist.setPosition(intakeWristBasePose);
 
 
-                vSliderTimer = resetTimer();
-                vSliderTimer = startTimer();
+                vSliderTimerOld = resetTimer();
+                vSliderTimerOld = startTimer();
 
-                while((!vtSensor.isPressed()) && elapsedTime(vSliderTimer) <= ATC.vSliderMaxTime){
+                while((!vtSensor.isPressed()) && elapsedTime(vSliderTimerOld) <= ATC.vSliderMaxTime){
                     vSlider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     telemetry.addData("MaxTimer", ATC.vSliderMaxTime);
-                    telemetry.addData("VTimer", elapsedTime(vSliderTimer));
+                    telemetry.addData("VTimer", elapsedTime(vSliderTimerOld));
                     telemetry.update();
                     vSlider.setPower(-1);
                 }
@@ -808,11 +708,11 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
         slider.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         ((DcMotorEx) slider).setVelocity(velocity);
     }
-    private ATE.SampleSensorState getSampleSensorState(){
-        ((NormalizedColorSensor) sampleSensor).setGain(2);
-        double distance = ((DistanceSensor) sampleSensor).getDistance(DistanceUnit.CM);
+    private ATE.SampleSensorState getSampleSensorState(ColorSensor colSensor){
+        ((NormalizedColorSensor) colSensor).setGain(2);
+        double distance = ((DistanceSensor) colSensor).getDistance(DistanceUnit.CM);
 
-        double hue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) sampleSensor).getNormalizedColors().toColor()), 0));
+        double hue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) colSensor).getNormalizedColors().toColor()), 0));
 
         if (distance <= 4 && hue >= 200 && hue <= 240) {
             return ATE.SampleSensorState.BLUE;
@@ -823,6 +723,12 @@ public class TeleopBlueAllianceV1 extends LinearOpMode {
         } else {
             return ATE.SampleSensorState.NONE;
         }
+    }
+    private void setLedLights(boolean switchOn){
+        led0.enable(switchOn);
+        led1.enable(switchOn);
+        led2.enable(switchOn);
+        led3.enable(switchOn);
     }
 
 }

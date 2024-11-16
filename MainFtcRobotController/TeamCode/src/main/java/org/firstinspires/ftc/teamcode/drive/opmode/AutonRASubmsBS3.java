@@ -25,7 +25,7 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 /*
  * This is an example of a more complex path to really test the tuning.
  */
-@Autonomous(name = "04_AutonRedAlliance3RedSamplesv1")
+@Autonomous(name = "08_RedSubmers3RS")
 public class AutonRASubmsBS3 extends LinearOpMode {
 
 
@@ -161,7 +161,7 @@ public class AutonRASubmsBS3 extends LinearOpMode {
 //Hang first blue Start
         TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(startPose).setReversed(true)
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(9,-37,Math.toRadians(-90)))
+                .lineToLinearHeading(new Pose2d(9,-36.5,Math.toRadians(-90)))
                 .addDisplacementMarker(1, () -> {
                     setSlider(vSlider, vSliderSubmHighPose, vSliderVelocity);
                     claw.setPosition(clawCatchTightPose);
@@ -225,11 +225,9 @@ public class AutonRASubmsBS3 extends LinearOpMode {
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(45,-56,Math.toRadians(90)),
+                .lineToLinearHeading(new Pose2d(45,-59,Math.toRadians(90)),
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .setReversed(true)
-                .lineToLinearHeading(new Pose2d(45,-59,Math.toRadians(90)))
                 .addDisplacementMarker(80, () -> {
                     clawArm.setPosition(clawArmWallPose);
                     clawWrist.setPosition(clawWristWallPose);
@@ -356,7 +354,7 @@ public class AutonRASubmsBS3 extends LinearOpMode {
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
 
                 .setReversed(false)
-                .splineToLinearHeading(new Pose2d(47,-55,Math.toRadians(90)),Math.toRadians(-90),
+                .splineToLinearHeading(new Pose2d(47,-50,Math.toRadians(90)),Math.toRadians(-90),
                         SampleMecanumDrive.getVelocityConstraint(45.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .addDisplacementMarker(20, () -> {
@@ -364,6 +362,7 @@ public class AutonRASubmsBS3 extends LinearOpMode {
                     clawWrist.setPosition(clawWristWallPose);
                     claw.setPosition(clawReleasePose);
                 })
+                .lineToLinearHeading(new Pose2d(47,-57,Math.toRadians(90)))
                 .build();
         drive.followTrajectorySequence(trajSequence);
 
@@ -438,16 +437,7 @@ public class AutonRASubmsBS3 extends LinearOpMode {
         clawWrist.setPosition(clawWristBasePose);
         resetSlider(vSlider, vtSensor, 2);
 
-// Park
 
-        trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
-                .setReversed(false)
-                .lineToLinearHeading(new Pose2d(54,-54,Math.toRadians(-90)),
-                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .build();
-        drive.followTrajectorySequence(trajSequence);
-        clawWrist.setPosition(clawWristWallPose);
     }
 
     private void setSlider(DcMotor slider, int targetPose, int velocity) {

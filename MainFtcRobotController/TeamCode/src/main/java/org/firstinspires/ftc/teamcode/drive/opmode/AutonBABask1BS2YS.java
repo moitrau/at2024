@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 /*
  * This is an example of a more complex path to really test the tuning.
  */
-@Autonomous(name = "06_AutonBlueAllianceYellowSamplev2")
+@Autonomous(name = "02_BlueBasket1BS2YS")
 public class AutonBABask1BS2YS extends LinearOpMode {
 
 

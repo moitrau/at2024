@@ -25,7 +25,7 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 /*
  * This is an example of a more complex path to really test the tuning.
  */
-@Autonomous(name = "02_BlueSpecimens2Blues")
+@Autonomous(name = "03_BlueSubmers2BS")
 public class AutonBASubmBS2 extends LinearOpMode {
 
 

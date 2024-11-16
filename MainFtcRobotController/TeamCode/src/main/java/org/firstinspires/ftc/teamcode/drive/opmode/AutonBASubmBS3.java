@@ -25,7 +25,7 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 /*
  * This is an example of a more complex path to really test the tuning.
  */
-@Autonomous(name = "03_BlueSpecimens3Blues")
+@Autonomous(name = "04_BlueSubmers3BS")
 public class AutonBASubmBS3 extends LinearOpMode {
 
 
@@ -220,11 +220,9 @@ public class AutonBASubmBS3 extends LinearOpMode {
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(-45,56,Math.toRadians(-90)),
+                .lineToLinearHeading(new Pose2d(-45,59,Math.toRadians(-90)),
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .setReversed(true)
-                .lineToLinearHeading(new Pose2d(-45,59,Math.toRadians(-90)))
                 .addDisplacementMarker(80, () -> {
                     clawArm.setPosition(clawArmWallPose);
                     clawWrist.setPosition(clawWristWallPose);
@@ -351,7 +349,7 @@ public class AutonBASubmBS3 extends LinearOpMode {
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
 
                 .setReversed(false)
-                .splineToLinearHeading(new Pose2d(-47,55,Math.toRadians(-90)),Math.toRadians(90),
+                .splineToLinearHeading(new Pose2d(-47,50,Math.toRadians(-90)),Math.toRadians(90),
                         SampleMecanumDrive.getVelocityConstraint(45.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .addDisplacementMarker(20, () -> {
@@ -359,6 +357,7 @@ public class AutonBASubmBS3 extends LinearOpMode {
                     clawWrist.setPosition(clawWristWallPose);
                     claw.setPosition(clawReleasePose);
                 })
+                .lineToLinearHeading(new Pose2d(-47,57,Math.toRadians(-90)))
                 .build();
         drive.followTrajectorySequence(trajSequence);
 

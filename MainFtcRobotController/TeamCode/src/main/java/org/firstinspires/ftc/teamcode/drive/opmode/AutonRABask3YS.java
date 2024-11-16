@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 /*
  * This is an example of a more complex path to really test the tuning.
  */
-@Autonomous(name = "04_AutonRedAllianceYellowSample")
+@Autonomous(name = "05_RedBasket3YS")
 public class AutonRABask3YS extends LinearOpMode {
 
 
@@ -238,7 +238,8 @@ public class AutonRABask3YS extends LinearOpMode {
         clawWrist.setPosition(clawWristBasePose);
         clawArm.setPosition(clawArmIntakePose);
         claw.setPosition(clawReleasePose);
-        sleep(500);
+        sleep(750);
+        clawWrist.setPosition(clawWristIntakePose);
         claw.setPosition(clawCatchLoosePose);
         sleep(500);
         clawArm.setPosition(clawArmBasePose);
@@ -314,7 +315,8 @@ public class AutonRABask3YS extends LinearOpMode {
         clawWrist.setPosition(clawWristBasePose);
         clawArm.setPosition(clawArmIntakePose);
         claw.setPosition(clawReleasePose);
-        sleep(500);
+        sleep(750);
+        clawWrist.setPosition(clawWristIntakePose);
         claw.setPosition(clawCatchLoosePose);
         sleep(500);
         clawArm.setPosition(clawArmBasePose);
@@ -358,8 +360,8 @@ public class AutonRABask3YS extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(-59,-40,Math.toRadians(90)),
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .splineToLinearHeading(new Pose2d(-28,-10,Math.toRadians(0)),Math.toRadians(10),
-                        SampleMecanumDrive.getVelocityConstraint(50.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                .lineToLinearHeading(new Pose2d(-52,-55,Math.toRadians(90)),
+                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
         drive.followTrajectorySequence(trajSequence);
