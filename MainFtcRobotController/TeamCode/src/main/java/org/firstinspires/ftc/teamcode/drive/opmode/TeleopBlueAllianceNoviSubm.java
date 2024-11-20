@@ -396,8 +396,12 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
 //Specimen code starts
 
             if(gamepad1.a && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
-                clawArm.setPosition(ATC.clawArmFloorPose);
+                /*clawArm.setPosition(ATC.clawArmFloorPose);
                 clawWrist.setPosition(ATC.clawWristFloorPose);
+                sleep(250);
+                claw.setPosition(clawReleasePose);*/
+                clawArm.setPosition(ATC.clawArmWallPose);
+                clawWrist.setPosition(ATC.clawWristWallPose);
                 sleep(250);
                 claw.setPosition(clawReleasePose);
                 clawWristState = ATE.ClawWristState.PICK_FLOOR;

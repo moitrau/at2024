@@ -303,4 +303,8 @@ public class TrajectorySequenceRunner {
     public boolean isBusy() {
         return currentTrajectorySequence != null;
     }
+    public void breakFollowing() {
+        currentTrajectorySequence = null;
+        remainingMarkers.clear();
+    }
 }
