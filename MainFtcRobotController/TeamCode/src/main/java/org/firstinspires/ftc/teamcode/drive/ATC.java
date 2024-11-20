@@ -43,6 +43,12 @@ public class ATC {
     public static final int vSliderBaskLowPose = 1400;
     public static final int vSliderSpecimenSwipePose = 900;
     public static final int vSliderVelocity=10000;
+    public static final int vSliderHangVelocity=750;
+
+    //Stage1 diff determines when to push the arm while going down
+    public static final int submHangStage1Diff = 300;
+    //Stage2 diff determines when to release the claw and reset the arm
+    public static final int submHangStage2Diff = 400;
 
     public static final int hSliderBasePose = 0;
     public static final int hSliderMinPose = 600;
@@ -59,6 +65,15 @@ public class ATC {
     public static final double dropMaxTime = 0.5;
     public static final double outtakeMaxTime = 2.0;
     public static final double orcaModeMaxTime = 3.0;
-
-
+    public static final double submAdjustMaxTime = 1;
+    public static final double wallAdjustMaxTime = 1;
+    public static final double speciPickAdjustMaxTime = 3.0;
+    //Below values are in cms
+    public static final double submAdjustDistance = 17.0;
+    public static final double wallAdjustDistance = 21.0;
+    public static final double speciPickAdjustDistance = 14.3;
+    //Power
+    public static final double submAdjustPower = -0.25;
+    public static final double wallAdjustPower = -0.25;
+    public static final double speciPickAdjustPower = -0.25;
 }

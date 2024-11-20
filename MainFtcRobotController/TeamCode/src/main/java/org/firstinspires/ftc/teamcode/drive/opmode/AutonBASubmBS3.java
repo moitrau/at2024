@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.CalibrationFromLimeLight;
+import org.firstinspires.ftc.teamcode.ATCommons;
 import org.firstinspires.ftc.teamcode.drive.ATC;
 import org.firstinspires.ftc.teamcode.drive.ATE;
 import org.firstinspires.ftc.teamcode.drive.ATRoboTimer;
@@ -58,6 +59,7 @@ public class AutonBASubmBS3 extends LinearOpMode {
     private TouchSensor htSensor;
     private Limelight3A limelight;
     private CalibrationFromLimeLight calibrationFromLimeLight;
+    private ATCommons atCommons;
 
     double clawCatchTightPose = ATC.clawCatchTightPose;
     double clawCatchLoosePose = ATC.clawCatchLoosePose;
@@ -149,7 +151,8 @@ public class AutonBASubmBS3 extends LinearOpMode {
         hSlider.setDirection(DcMotor.Direction.REVERSE);
         resetSlider(hSlider, htSensor, 5);
         resetSlider(vSlider, vtSensor, 5);
-
+        atCommons = new ATCommons();
+        atCommons.init(hardwareMap);
 
         waitForStart();
 
@@ -176,6 +179,7 @@ public class AutonBASubmBS3 extends LinearOpMode {
         calibrationFromLimeLight.LimeLight3A(0, 0, 0, 0.5, hardwareMap);
         int i = 0;
         double[] resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIght();
+        atCommons.selfAdjust(ATC.submAdjustDistance,ATC.submAdjustMaxTime,ATC.submAdjustPower);
         while(i<100){
             i++;
             resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIght();
@@ -191,20 +195,21 @@ public class AutonBASubmBS3 extends LinearOpMode {
         claw.setPosition(clawCatchTightPose);
         clawWrist.setPosition(clawWristHangPose);
         clawArm.setPosition(clawArmHangPose);
-        setSlider(vSlider,ATC.vSliderSubmLowPose,750);
+        setSlider(vSlider,ATC.vSliderSubmLowPose,ATC.vSliderHangVelocity);
 
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-300) {
+        while (ATC.vSliderSubmHighPose-vSlider.getCurrentPosition() < ATC.submHangStage1Diff) {
+            atCommons.startSelfAdjustAsync(ATC.submAdjustDistance,ATC.submAdjustPower);
             telemetry.addData("Hang First Specimen vSlider Current Position1", vSlider.getCurrentPosition());
             //telemetry.update();
         }
 
         clawArm.setPosition(clawArmWallPose);
         clawWrist.setPosition(clawWristDropPose);
-        selfAdjustSubm();
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-400 ) {
 
+        while (ATC.vSliderSubmHighPose-vSlider.getCurrentPosition() < ATC.submHangStage2Diff) {
+            //atCommons.startSelfAdjustAsync(ATC.submAdjustDistance,ATC.submAdjustPower);
         }
-
+        atCommons.stopSelfAdjustAsync();
         claw.setPosition(clawReleasePose);
         clawArm.setPosition(clawArmBasePose);
         clawWrist.setPosition(clawWristBasePose);
@@ -233,7 +238,7 @@ public class AutonBASubmBS3 extends LinearOpMode {
                 .build();
         drive.followTrajectorySequence(trajSequence);
 
-        selfAdjustWall();
+        atCommons.selfAdjust(ATC.wallAdjustDistance,ATC.wallAdjustMaxTime,ATC.wallAdjustPower);
 //Pick from wall and hang 2nd Blue
 
         claw.setPosition(clawCatchTightPose);
@@ -244,7 +249,7 @@ public class AutonBASubmBS3 extends LinearOpMode {
 
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
                 .setReversed(false)
-                .splineToLinearHeading(new Pose2d(-0,46,Math.toRadians(90)),Math.toRadians(-60),
+                .splineToLinearHeading(new Pose2d(-0,40,Math.toRadians(90)),Math.toRadians(-60),
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(60.0))
                 .build();
@@ -260,6 +265,7 @@ public class AutonBASubmBS3 extends LinearOpMode {
                 break;
             }
         }
+
         telemetry.addData("resultCordinates[1]",resultCordinates[1]);
         telemetry.addData("resultCordinates[2]",resultCordinates[2]);
 
@@ -275,7 +281,7 @@ public class AutonBASubmBS3 extends LinearOpMode {
 
         trajSequence = drive.trajectorySequenceBuilder(correctedPose)
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(-6,37,Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(-7,37,Math.toRadians(90)))
                 .addDisplacementMarker(1, () -> {
                     setSlider(vSlider, vSliderSubmHighPose, vSliderVelocity);
                     claw.setPosition(clawCatchTightPose);
@@ -284,6 +290,7 @@ public class AutonBASubmBS3 extends LinearOpMode {
                 })
                 .build();
         drive.followTrajectorySequence(trajSequence);
+        atCommons.selfAdjust(ATC.submAdjustDistance,ATC.submAdjustMaxTime,ATC.submAdjustPower);
 
 
         /*calibrationFromLimeLight = new CalibrationFromLimeLight();
@@ -326,19 +333,19 @@ public class AutonBASubmBS3 extends LinearOpMode {
         claw.setPosition(clawCatchTightPose);
         clawWrist.setPosition(clawWristHangPose);
         clawArm.setPosition(clawArmHangPose);
-        setSlider(vSlider,ATC.vSliderSubmLowPose,750);
+        setSlider(vSlider,ATC.vSliderSubmLowPose,ATC.vSliderHangVelocity);
 
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-300) {
-
+        while (ATC.vSliderSubmHighPose-vSlider.getCurrentPosition() < ATC.submHangStage1Diff) {
+            atCommons.startSelfAdjustAsync(ATC.submAdjustDistance,ATC.submAdjustPower);
         }
 
         clawArm.setPosition(clawArmWallPose);
         clawWrist.setPosition(clawWristDropPose);
-        selfAdjustSubm();
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-400 ) {
 
+        while (ATC.vSliderSubmHighPose-vSlider.getCurrentPosition() < ATC.submHangStage2Diff ) {
+            //atCommons.startSelfAdjustAsync(ATC.submAdjustDistance,ATC.submAdjustPower);
         }
-
+        atCommons.stopSelfAdjustAsync();
         claw.setPosition(clawReleasePose);
         clawArm.setPosition(clawArmBasePose);
         clawWrist.setPosition(clawWristBasePose);
@@ -362,7 +369,7 @@ public class AutonBASubmBS3 extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(-47,56,Math.toRadians(-90)))
                 .build();
         drive.followTrajectorySequence(trajSequence);
-        selfAdjustWall();
+        atCommons.selfAdjust(ATC.wallAdjustDistance,ATC.wallAdjustMaxTime,ATC.wallAdjustPower);
 //Pick from wall and hang 3nd Blue
 
         claw.setPosition(clawCatchTightPose);
@@ -372,7 +379,7 @@ public class AutonBASubmBS3 extends LinearOpMode {
 
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
                 .setReversed(false)
-                .splineToLinearHeading(new Pose2d(0,44,Math.toRadians(90)),Math.toRadians(-60),
+                .splineToLinearHeading(new Pose2d(0,40,Math.toRadians(90)),Math.toRadians(-60),
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(60))
                 .build();
@@ -404,7 +411,7 @@ public class AutonBASubmBS3 extends LinearOpMode {
 
         trajSequence = drive.trajectorySequenceBuilder(correctedPose)
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(0,37,Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(-5.0,37,Math.toRadians(90)))
                 .addDisplacementMarker(1, () -> {
                     setSlider(vSlider, vSliderSubmHighPose, vSliderVelocity);
                     claw.setPosition(clawCatchTightPose);
@@ -413,23 +420,23 @@ public class AutonBASubmBS3 extends LinearOpMode {
                 })
                 .build();
         drive.followTrajectorySequence(trajSequence);
-
+        atCommons.selfAdjust(ATC.submAdjustDistance,ATC.submAdjustMaxTime,ATC.submAdjustPower);
         claw.setPosition(clawCatchTightPose);
         clawWrist.setPosition(clawWristHangPose);
         clawArm.setPosition(clawArmHangPose);
-        setSlider(vSlider,ATC.vSliderSubmLowPose,750);
+        setSlider(vSlider,ATC.vSliderSubmLowPose,ATC.vSliderHangVelocity);
 
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-300) {
-
+        while (ATC.vSliderSubmHighPose-vSlider.getCurrentPosition() < ATC.submHangStage1Diff) {
+            atCommons.startSelfAdjustAsync(ATC.submAdjustDistance,ATC.submAdjustPower);
         }
 
         clawArm.setPosition(clawArmWallPose);
         clawWrist.setPosition(clawWristDropPose);
 
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-400 ) {
-
+        while (ATC.vSliderSubmHighPose-vSlider.getCurrentPosition() < ATC.submHangStage2Diff) {
+            //atCommons.startSelfAdjustAsync(ATC.submAdjustDistance,ATC.submAdjustPower);
         }
-        selfAdjustSubm();
+        atCommons.stopSelfAdjustAsync();
         claw.setPosition(clawReleasePose);
         clawArm.setPosition(clawArmBasePose);
         clawWrist.setPosition(clawWristBasePose);
@@ -486,34 +493,5 @@ public class AutonBASubmBS3 extends LinearOpMode {
             return ATE.SampleSensorState.NONE;
         }
     }
-    private void selfAdjustSubm(){
-        ATRoboTimer selfAdjustTimer = new ATRoboTimer();
-        selfAdjustTimer.startTimer();
-        while(distanceSensor.getDistance(DistanceUnit.CM)>=16 && selfAdjustTimer.elapsedTime() <= 1.0) {
-            rightFront.setPower(-0.25);
-            leftFront.setPower(-0.25);
-            leftRear.setPower(-0.25);
-            rightRear.setPower(-0.25);
-        }
-        selfAdjustTimer.stopTimer();
-        rightFront.setPower(0);
-        leftFront.setPower(0);
-        leftRear.setPower(0);
-        rightRear.setPower(0);
-    }
-    private void selfAdjustWall(){
-        ATRoboTimer selfAdjustTimer = new ATRoboTimer();
-        selfAdjustTimer.startTimer();
-        while(distanceSensor.getDistance(DistanceUnit.CM)>=21 && selfAdjustTimer.elapsedTime() <= 1.0) {
-            rightFront.setPower(-0.25);
-            leftFront.setPower(-0.25);
-            leftRear.setPower(-0.25);
-            rightRear.setPower(-0.25);
-        }
-        selfAdjustTimer.stopTimer();
-        rightFront.setPower(0);
-        leftFront.setPower(0);
-        leftRear.setPower(0);
-        rightRear.setPower(0);
-    }
+
 }

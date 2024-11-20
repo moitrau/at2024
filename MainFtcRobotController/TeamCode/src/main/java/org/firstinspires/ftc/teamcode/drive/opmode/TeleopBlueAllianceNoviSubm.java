@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.LED;
 
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.ATCommons;
 import org.firstinspires.ftc.teamcode.CalibrationFromLimeLight;
 import org.firstinspires.ftc.teamcode.drive.ATC;
 import org.firstinspires.ftc.teamcode.drive.ATE;
@@ -71,6 +72,7 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
     private LED led3;
     private Limelight3A limelight;
     private CalibrationFromLimeLight calibrationFromLimeLight;
+    private ATCommons atCommons;
 
     double clawCatchTightPose = ATC.clawCatchTightPose;
     double clawCatchLoosePose = ATC.clawCatchLoosePose;
@@ -123,10 +125,14 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
     ATRoboTimer vSliderTimer = new ATRoboTimer();
 
     double[] llPose;
+    
     double rrllDeltaY = 0.0;
     double rrllDeltaHeading = 0.0;
 
     boolean ledBlinkerVar = false;
+
+    double[] specimenPositions = {12.0, 9.0, 6.0, 3.0, 0.0 };
+    int spPointer = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -157,8 +163,10 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
         led1 = hardwareMap.get(LED.class, "led1");
         led2 = hardwareMap.get(LED.class, "led2");
         led3 = hardwareMap.get(LED.class, "led3");
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+        atCommons = new ATCommons();
+        atCommons.init(hardwareMap);
 //Set Drive Mode
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 //Initialize Poses
@@ -407,14 +415,14 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                 clawWristState = ATE.ClawWristState.PICK_FLOOR;
             }
 
-            if(gamepad1.dpad_up && gamepad1.left_bumper ){
+            if(gamepad1.dpad_up && gamepad1.left_bumper && sampleSensorState == ATE.SampleSensorState.NONE && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
                 claw.setPosition(clawCatchTightPose);
                 clawWrist.setPosition(clawWristHangPose);
                 clawArm.setPosition(clawArmHangPose);
                 setSlider(vSlider,ATC.vSliderSpecimenSwipePose,vSliderVelocity);
                 vSliderState = ATE.VerticalSliderState.SPECIMEN_SWIPE;
             }
-            if(gamepad1.dpad_down && gamepad1.left_bumper){
+            if(gamepad1.dpad_down && gamepad1.left_bumper && sampleSensorState == ATE.SampleSensorState.NONE && clawWristState == ATE.ClawWristState.BASE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
                 clawArm.setPosition(clawArmBasePose);
                 clawWrist.setPosition(clawWristBasePose);
                 clawWristState = ATE.ClawWristState.BASE;
@@ -486,10 +494,14 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                     vSliderTimer.startTimer();
                     TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(correctedPose)
                             .setReversed(false)
-                            .lineToLinearHeading(new Pose2d(drive.getPoseEstimate().getX(), 37, Math.toRadians(90)))
+                            .lineToLinearHeading(new Pose2d(specimenPositions[spPointer], 37, Math.toRadians(90)))
                             .build();
                     drive.followTrajectorySequence(trajSequence);
-
+                    atCommons.selfAdjust(ATC.submAdjustDistance,ATC.submAdjustMaxTime,ATC.submAdjustPower);
+                    spPointer++;
+                    if (spPointer >= specimenPositions.length){
+                        spPointer = 0;
+                    }
                     while (vSlider.getCurrentPosition() < ATC.vSliderSubmHighPose-10) {
                         if (vSliderTimer.isActive) {
                             if (vSliderTimer.elapsedTime() >= 3){
@@ -512,8 +524,9 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                 ///drive.breakFollowing();
             }
 
-            if(gamepad1.left_trigger > 0.7 && drive.getPoseEstimate().getY() > 39 && drive.getPoseEstimate().getX() < -45 ){
+            if(gamepad1.left_trigger > 0.7 && drive.getPoseEstimate().getY() > 39 && drive.getPoseEstimate().getX() < -39 ){
                 setLedLights(true);
+                atCommons.selfAdjust(ATC.speciPickAdjustDistance,ATC.speciPickAdjustMaxTime,ATC.speciPickAdjustPower);
                 claw.setPosition(clawCatchTightPose);
                 sleep(500);
                 clawWrist.setPosition(clawWristBasePose);
@@ -521,9 +534,9 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                 setSlider(vSlider,ATC.vSliderWallLiftPose,vSliderVelocity);
                 clawWristState = ATE.ClawWristState.BASE;
                 TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .lineToLinearHeading(new Pose2d(0,46,Math.toRadians(90)),
+                        .lineToLinearHeading(new Pose2d(0,44,Math.toRadians(90)),
                                 SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                                SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                                SampleMecanumDrive.getAccelerationConstraint(60))
                         .build();
                 drive.followTrajectorySequence(trajSequence);
 
@@ -533,7 +546,7 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                 TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                         .lineToLinearHeading(new Pose2d(-50,42,Math.toRadians(-90)),
                                 SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                                SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                                SampleMecanumDrive.getAccelerationConstraint(60))
                         .addDisplacementMarker(40, () -> {
                             clawArm.setPosition(ATC.clawArmFloorPose);
                             clawWrist.setPosition(ATC.clawWristFloorPose);
