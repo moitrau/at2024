@@ -131,8 +131,10 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
 
     boolean ledBlinkerVar = false;
 
-    double[] specimenPositions = {12.0, 9.0, 6.0, 3.0, 0.0 };
+    double[] specimenPositions = { 10, 7, 4, 1 , -2};
     int spPointer = 0;
+
+    boolean executeOnceDone = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -213,24 +215,28 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
         calibrationFromLimeLight.LimeLight3A(0, 0, 0, 0.5, hardwareMap);
         int i = 0;
         llPose = calibrationFromLimeLight.CalibratePoseWithLimelIght();
+        rrllDeltaY =  -6.3;//37.0 - llPose[1];
+        rrllDeltaHeading = -3;//90 -llPose[2];
+        /*
         while(i<10){
             i++;
             llPose = calibrationFromLimeLight.CalibratePoseWithLimelIght();
             if(llPose[1] > 10.0){
-                rrllDeltaY =  37.0 - llPose[1];
-                rrllDeltaHeading = 90 -llPose[2];
-                Pose2d correctedPose = new Pose2d(0.0, llPose[1] + rrllDeltaY, Math.toRadians(llPose[2] + rrllDeltaHeading));
+                rrllDeltaY =  6.3;//37.0 - llPose[1];
+                rrllDeltaHeading = 2;//90 -llPose[2];
+                Pose2d correctedPose = new Pose2d(-5.0, llPose[1] + rrllDeltaY, Math.toRadians(llPose[2] + rrllDeltaHeading));
                 drive.setPoseEstimate(correctedPose);
                 setLedLights(true);
                 break;
             }
-        }
+        }*/
 
 
 //Wait till Play button is clicked on DriverHub
         waitForStart();
 
         while (!isStopRequested()) {
+
 
             if(htSensor.isPressed()){
                 //If  Horizontal Slider touches touch sensor, wrist should go to consume position
@@ -408,8 +414,8 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                 clawWrist.setPosition(ATC.clawWristFloorPose);
                 sleep(250);
                 claw.setPosition(clawReleasePose);*/
-                clawArm.setPosition(ATC.clawArmWallPose);
-                clawWrist.setPosition(ATC.clawWristWallPose);
+                clawArm.setPosition(ATC.clawArmFloorPose);
+                clawWrist.setPosition(ATC.clawWristFloorPose);
                 sleep(250);
                 claw.setPosition(clawReleasePose);
                 clawWristState = ATE.ClawWristState.PICK_FLOOR;
@@ -464,6 +470,42 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                 clawArmState = ATE.ClawArmState.HANG;
             }
 
+            if(executeOnceDone == false){
+                Pose2d correctedPose = new Pose2d(-5.0,37,Math.toRadians(90));
+                drive.setPoseEstimate(correctedPose);
+                TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(correctedPose)
+                        .setReversed(false)
+                        .splineToLinearHeading(new Pose2d(-36,34,Math.toRadians(-90)),Math.toRadians(-90),
+                                SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                                SampleMecanumDrive.getAccelerationConstraint(60.0))
+                        .splineToLinearHeading(new Pose2d(-55,16,Math.toRadians(-90)),Math.toRadians(145),
+                                SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                                SampleMecanumDrive.getAccelerationConstraint(60.0))
+                        .setReversed(true)
+                        .lineToLinearHeading(new Pose2d(-55,56,Math.toRadians(-90)),
+                                SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                                SampleMecanumDrive.getAccelerationConstraint(60.0))
+                        .setReversed(false)
+                        .splineToLinearHeading(new Pose2d(-62,17,Math.toRadians(-90)),Math.toRadians(145),
+                                SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                                SampleMecanumDrive.getAccelerationConstraint(60.0))
+                        .setReversed(true)
+                        .lineToLinearHeading(new Pose2d(-61,58,Math.toRadians(-100)),
+                                SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                                SampleMecanumDrive.getAccelerationConstraint(60.0))
+                        .lineToLinearHeading(new Pose2d(-61,50,Math.toRadians(-100)),
+                                SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                                SampleMecanumDrive.getAccelerationConstraint(60.0))
+                        .build();
+                drive.followTrajectorySequence(trajSequence);
+                clawArm.setPosition(ATC.clawArmFloorPose);
+                clawWrist.setPosition(ATC.clawWristFloorPose);
+                sleep(250);
+                claw.setPosition(clawReleasePose);
+                clawWristState = ATE.ClawWristState.PICK_FLOOR;
+                executeOnceDone = true;
+            }
+
             if(gamepad2.left_trigger > 0.7 && orcaModeState == ATE.OrcaModeState.DISABLED) {
                 orcaModeState = ATE.OrcaModeState.CLIP_SPECIMEN_TO_SUBM;
                 orcaModeTimer.startTimer();
@@ -483,9 +525,19 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                 llPose = calibrationFromLimeLight.CalibratePoseWithLimelIght();
                 ledBlinkerVar = !ledBlinkerVar;
                 setLedLights(ledBlinkerVar);
+
+                /*if((90 - (llPose[2] + rrllDeltaHeading)) > 5 || (90 - (llPose[2] + rrllDeltaHeading)) < -5){
+                    TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(new Pose2d())
+                            .turn(Math.toRadians(90 - (llPose[2] + rrllDeltaHeading)))
+                            .build();
+                    drive.followTrajectorySequence(trajSequence);
+                }
+
+                llPose = calibrationFromLimeLight.CalibratePoseWithLimelIght();*/
+
                 if(llPose[0] > -10.0 && llPose[0] < 10.0 && llPose[1] > 48.0  && rrllDeltaY != 0.0) {
                     setLedLights(true);
-                    Pose2d correctedPose = new Pose2d(drive.getPoseEstimate().getX(), llPose[1] + rrllDeltaY, Math.toRadians(llPose[2] + rrllDeltaHeading));
+                    Pose2d correctedPose = new Pose2d(llPose[0], llPose[1] + rrllDeltaY, Math.toRadians(llPose[2] + rrllDeltaHeading));
                     drive.setPoseEstimate(correctedPose);
                     setSlider(vSlider, vSliderSubmHighPose + 50, vSliderVelocity);
                     claw.setPosition(clawCatchTightPose);
