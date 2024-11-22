@@ -18,6 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.ATCommons;
 import org.firstinspires.ftc.teamcode.CalibrationFromLimeLight;
 import org.firstinspires.ftc.teamcode.drive.ATC;
+import org.firstinspires.ftc.teamcode.drive.ATCache;
 import org.firstinspires.ftc.teamcode.drive.ATE;
 import org.firstinspires.ftc.teamcode.drive.ATRoboTimer;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
@@ -125,7 +126,6 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
     ATRoboTimer vSliderTimer = new ATRoboTimer();
 
     double[] llPose;
-    
     double rrllDeltaY = 0.0;
     double rrllDeltaHeading = 0.0;
 
@@ -215,28 +215,34 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
         calibrationFromLimeLight.LimeLight3A(0, 0, 0, 0.5, hardwareMap);
         int i = 0;
         llPose = calibrationFromLimeLight.CalibratePoseWithLimelIght();
-        rrllDeltaY =  -6.3;//37.0 - llPose[1];
-        rrllDeltaHeading = -3;//90 -llPose[2];
-        /*
-        while(i<10){
-            i++;
-            llPose = calibrationFromLimeLight.CalibratePoseWithLimelIght();
-            if(llPose[1] > 10.0){
-                rrllDeltaY =  6.3;//37.0 - llPose[1];
-                rrllDeltaHeading = 2;//90 -llPose[2];
-                Pose2d correctedPose = new Pose2d(-5.0, llPose[1] + rrllDeltaY, Math.toRadians(llPose[2] + rrllDeltaHeading));
-                drive.setPoseEstimate(correctedPose);
-                setLedLights(true);
-                break;
+
+        if(ATCache.rrllDeltaY > 1.0 || ATCache.rrllDeltaY < -1.0){
+            rrllDeltaY = ATCache.rrllDeltaY;
+            rrllDeltaHeading = ATCache.rrllDeltaHeading;
+            telemetry.addData("ATCache.rrllDeltaY", ATCache.rrllDeltaY);
+            telemetry.addData("ATCache.rrllDeltaHeading", ATCache.rrllDeltaHeading);
+            telemetry.update();
+        } else {
+            while (i < 100) {
+                i++;
+                llPose = calibrationFromLimeLight.CalibratePoseWithLimelIght();
+                if (llPose[1] > 10.0) {
+                    rrllDeltaY = 37.0 - llPose[1];
+                    Pose2d correctedPose = new Pose2d(-5.0, llPose[1] + rrllDeltaY, Math.toRadians(llPose[2] + rrllDeltaHeading));
+                    drive.setPoseEstimate(correctedPose);
+                    setLedLights(true);
+                    telemetry.addData("rrllDeltaYOnly", rrllDeltaY);
+                    telemetry.update();
+                    break;
+                }
             }
-        }*/
+        }
 
 
 //Wait till Play button is clicked on DriverHub
         waitForStart();
 
         while (!isStopRequested()) {
-
 
             if(htSensor.isPressed()){
                 //If  Horizontal Slider touches touch sensor, wrist should go to consume position
@@ -325,6 +331,10 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
 //Sample sensor code ends
             if(clawArmState == ATE.ClawArmState.PICK_INTAKE && clawWristState == ATE.ClawWristState.PICK_INTAKE && intakeWristState == ATE.IntakeWristState.PICK_INTAKE ) {
                 if(consumeTimer.isActive) {
+                    intakeLW.setDirection(Servo.Direction.REVERSE);
+                    intakeRW.setDirection(Servo.Direction.FORWARD);
+                    intakeLW.setPosition(0.9);
+                    intakeRW.setPosition(0.9);
                     intakeWrist.setPosition(ATC.intakeWristConsumePose);
                     if (consumeTimer.elapsedTime() >= ATC.consumeMaxTime){
                         consumeTimer.stopTimer();
@@ -336,7 +346,10 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                     clawWrist.setPosition(clawWristBasePose);
                     clawArm.setPosition(clawArmIntakePose);
                     claw.setPosition(clawReleasePose);
-
+                    intakeLW.setDirection(Servo.Direction.REVERSE);
+                    intakeRW.setDirection(Servo.Direction.FORWARD);
+                    intakeLW.setPosition(0.9);
+                    intakeRW.setPosition(0.9);
                     if (grabTimer.elapsedTime() >= ATC.grabMaxTime){
                         grabTimer.stopTimer();
                         clawTimer.startTimer();
@@ -345,6 +358,10 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                 if (clawTimer.isActive) {
                     clawWrist.setPosition(clawWristIntakePose);
                     claw.setPosition(clawCatchLoosePose);
+                    intakeLW.setDirection(Servo.Direction.REVERSE);
+                    intakeRW.setDirection(Servo.Direction.FORWARD);
+                    intakeLW.setPosition(0.9);
+                    intakeRW.setPosition(0.9);
                     if (clawTimer.elapsedTime() >= ATC.clawMaxTime){
                         clawTimer.stopTimer();
                         pickTimer.startTimer();
@@ -357,6 +374,8 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                         pickTimer.stopTimer();
                         clawArmState = ATE.ClawArmState.BASE;
                         clawWristState = ATE.ClawWristState.BASE;
+                        intakeLW.setPosition(0.5);
+                        intakeRW.setPosition(0.5);
                     }
                 }
             }
@@ -410,10 +429,6 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
 //Specimen code starts
 
             if(gamepad1.a && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
-                /*clawArm.setPosition(ATC.clawArmFloorPose);
-                clawWrist.setPosition(ATC.clawWristFloorPose);
-                sleep(250);
-                claw.setPosition(clawReleasePose);*/
                 clawArm.setPosition(ATC.clawArmFloorPose);
                 clawWrist.setPosition(ATC.clawWristFloorPose);
                 sleep(250);
@@ -470,7 +485,7 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                 clawArmState = ATE.ClawArmState.HANG;
             }
 
-            if(executeOnceDone == false){
+            if(gamepad1.right_trigger > 0.95 && executeOnceDone == false){
                 Pose2d correctedPose = new Pose2d(-5.0,37,Math.toRadians(90));
                 drive.setPoseEstimate(correctedPose);
                 TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(correctedPose)
@@ -490,10 +505,10 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                                 SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                                 SampleMecanumDrive.getAccelerationConstraint(60.0))
                         .setReversed(true)
-                        .lineToLinearHeading(new Pose2d(-61,58,Math.toRadians(-100)),
+                        .lineToLinearHeading(new Pose2d(-61,58,Math.toRadians(-95)),
                                 SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                                 SampleMecanumDrive.getAccelerationConstraint(60.0))
-                        .lineToLinearHeading(new Pose2d(-61,50,Math.toRadians(-100)),
+                        .lineToLinearHeading(new Pose2d(-61,48,Math.toRadians(-95)),
                                 SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                                 SampleMecanumDrive.getAccelerationConstraint(60.0))
                         .build();
@@ -506,7 +521,7 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                 executeOnceDone = true;
             }
 
-            if(gamepad2.left_trigger > 0.7 && orcaModeState == ATE.OrcaModeState.DISABLED) {
+            if(gamepad2.left_trigger > 0.95 && orcaModeState == ATE.OrcaModeState.DISABLED) {
                 orcaModeState = ATE.OrcaModeState.CLIP_SPECIMEN_TO_SUBM;
                 orcaModeTimer.startTimer();
             }
@@ -525,16 +540,6 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                 llPose = calibrationFromLimeLight.CalibratePoseWithLimelIght();
                 ledBlinkerVar = !ledBlinkerVar;
                 setLedLights(ledBlinkerVar);
-
-                /*if((90 - (llPose[2] + rrllDeltaHeading)) > 5 || (90 - (llPose[2] + rrllDeltaHeading)) < -5){
-                    TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(new Pose2d())
-                            .turn(Math.toRadians(90 - (llPose[2] + rrllDeltaHeading)))
-                            .build();
-                    drive.followTrajectorySequence(trajSequence);
-                }
-
-                llPose = calibrationFromLimeLight.CalibratePoseWithLimelIght();*/
-
                 if(llPose[0] > -10.0 && llPose[0] < 10.0 && llPose[1] > 48.0  && rrllDeltaY != 0.0) {
                     setLedLights(true);
                     Pose2d correctedPose = new Pose2d(llPose[0], llPose[1] + rrllDeltaY, Math.toRadians(llPose[2] + rrllDeltaHeading));
@@ -576,7 +581,7 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                 ///drive.breakFollowing();
             }
 
-            if(gamepad1.left_trigger > 0.7 && drive.getPoseEstimate().getY() > 39 && drive.getPoseEstimate().getX() < -39 ){
+            if(gamepad1.left_trigger > 0.95 && drive.getPoseEstimate().getY() > 39 && drive.getPoseEstimate().getX() < -39 ){
                 setLedLights(true);
                 atCommons.selfAdjust(ATC.speciPickAdjustDistance,ATC.speciPickAdjustMaxTime,ATC.speciPickAdjustPower);
                 claw.setPosition(clawCatchTightPose);
@@ -593,7 +598,7 @@ public class TeleopBlueAllianceNoviSubm extends LinearOpMode {
                 drive.followTrajectorySequence(trajSequence);
 
             }
-            if(gamepad1.right_trigger > 0.7 && drive.getPoseEstimate().getX() > -12 && drive.getPoseEstimate().getX() < 12 && drive.getPoseEstimate().getY() > 35 && drive.getPoseEstimate().getY() < 44  ){
+            if(gamepad1.right_trigger > 0.95 && drive.getPoseEstimate().getX() > -12 && drive.getPoseEstimate().getX() < 12 && drive.getPoseEstimate().getY() > 35 && drive.getPoseEstimate().getY() < 44  ){
                 setLedLights(true);
                 TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                         .lineToLinearHeading(new Pose2d(-50,42,Math.toRadians(-90)),

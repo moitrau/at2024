@@ -15,7 +15,9 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.CalibrationFromLimeLight;
+import org.firstinspires.ftc.teamcode.ATCommons;
 import org.firstinspires.ftc.teamcode.drive.ATC;
+import org.firstinspires.ftc.teamcode.drive.ATCache;
 import org.firstinspires.ftc.teamcode.drive.ATE;
 import org.firstinspires.ftc.teamcode.drive.ATRoboTimer;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
@@ -53,10 +55,12 @@ public class AutonRASubmsBS3 extends LinearOpMode {
     private Servo intakeLW;
     private Servo intakeRW;
     private ColorSensor sampleSensor;
+    private DistanceSensor distanceSensor;
     private TouchSensor vtSensor;
     private TouchSensor htSensor;
     private Limelight3A limelight;
     private CalibrationFromLimeLight calibrationFromLimeLight;
+    private ATCommons atCommons;
 
     double clawCatchTightPose = ATC.clawCatchTightPose;
     double clawCatchLoosePose = ATC.clawCatchLoosePose;
@@ -111,6 +115,7 @@ public class AutonRASubmsBS3 extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+
 //Hardware Initialization
         rightRear = hardwareMap.get(DcMotor.class, "rearRight");
         rightFront = hardwareMap.get(DcMotor.class, "frontRight");
@@ -131,6 +136,7 @@ public class AutonRASubmsBS3 extends LinearOpMode {
         htSensor = hardwareMap.get(TouchSensor.class, "htSensor");
         vtSensor = hardwareMap.get(TouchSensor.class, "vtSensor");
         sampleSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+        distanceSensor = hardwareMap.get(DistanceSensor.class, "distanceSensor");
 
 
 //Set Drive Mode
@@ -147,12 +153,12 @@ public class AutonRASubmsBS3 extends LinearOpMode {
         hSlider.setDirection(DcMotor.Direction.REVERSE);
         resetSlider(hSlider, htSensor, 5);
         resetSlider(vSlider, vtSensor, 5);
-
+        atCommons = new ATCommons();
+        atCommons.init(hardwareMap);
 
         waitForStart();
 
         if (isStopRequested()) return;
-
 
         Pose2d startPose;
         startPose = new Pose2d(9, -64, Math.toRadians(-90));
@@ -161,7 +167,7 @@ public class AutonRASubmsBS3 extends LinearOpMode {
 //Hang first blue Start
         TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(startPose).setReversed(true)
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(9,-36.5,Math.toRadians(-90)))
+                .lineToLinearHeading(new Pose2d(9,-37,Math.toRadians(-90)))
                 .addDisplacementMarker(1, () -> {
                     setSlider(vSlider, vSliderSubmHighPose, vSliderVelocity);
                     claw.setPosition(clawCatchTightPose);
@@ -170,17 +176,18 @@ public class AutonRASubmsBS3 extends LinearOpMode {
                 })
                 .build();
         drive.followTrajectorySequence(trajSequence);
+
         calibrationFromLimeLight = new CalibrationFromLimeLight();
         calibrationFromLimeLight.LimeLight3A(0, 0, 0, 0.5, hardwareMap);
         int i = 0;
         double[] resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIght();
+        atCommons.selfAdjust(ATC.submAdjustDistance,ATC.submAdjustMaxTime,ATC.submAdjustPower);
         while(i<100){
             i++;
             resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIght();
-            telemetry.addData("LLX",resultCordinates[0]);
-            telemetry.addData("LLY",resultCordinates[1]);
-            telemetry.update();
             if(resultCordinates[1] < -10.0){
+                ATCache.rrllDeltaY = rrllDeltaY;
+                ATCache.rrllDeltaHeading = rrllDeltaHeading;
                 break;
             }
         }
@@ -194,9 +201,10 @@ public class AutonRASubmsBS3 extends LinearOpMode {
         claw.setPosition(clawCatchTightPose);
         clawWrist.setPosition(clawWristHangPose);
         clawArm.setPosition(clawArmHangPose);
-        setSlider(vSlider,ATC.vSliderSubmLowPose,750);
+        setSlider(vSlider,ATC.vSliderSubmLowPose,ATC.vSliderHangVelocity);
 
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-300) {
+        while (ATC.vSliderSubmHighPose-vSlider.getCurrentPosition() < ATC.submHangStage1Diff) {
+            atCommons.startSelfAdjustAsync(ATC.submAdjustDistance,ATC.submAdjustPower);
             telemetry.addData("Hang First Specimen vSlider Current Position1", vSlider.getCurrentPosition());
             //telemetry.update();
         }
@@ -204,8 +212,8 @@ public class AutonRASubmsBS3 extends LinearOpMode {
         clawArm.setPosition(clawArmWallPose);
         clawWrist.setPosition(clawWristDropPose);
 
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-400 ) {
-
+        while (ATC.vSliderSubmHighPose-vSlider.getCurrentPosition() < ATC.submHangStage2Diff) {
+            //atCommons.startSelfAdjustAsync(ATC.submAdjustDistance,ATC.submAdjustPower);
         }
 
         claw.setPosition(clawReleasePose);
@@ -220,14 +228,14 @@ public class AutonRASubmsBS3 extends LinearOpMode {
                 .setReversed(false)
                 .splineToLinearHeading(new Pose2d(36,-34,Math.toRadians(90)),Math.toRadians(90),
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                        SampleMecanumDrive.getAccelerationConstraint(60.0))
                 .splineToLinearHeading(new Pose2d(45,-16,Math.toRadians(90)),Math.toRadians(-55),
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                        SampleMecanumDrive.getAccelerationConstraint(60.0))
                 .setReversed(true)
                 .lineToLinearHeading(new Pose2d(45,-59,Math.toRadians(90)),
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                        SampleMecanumDrive.getAccelerationConstraint(60.0))
                 .addDisplacementMarker(80, () -> {
                     clawArm.setPosition(clawArmWallPose);
                     clawWrist.setPosition(clawWristWallPose);
@@ -236,7 +244,7 @@ public class AutonRASubmsBS3 extends LinearOpMode {
                 .build();
         drive.followTrajectorySequence(trajSequence);
 
-
+        atCommons.selfAdjust(ATC.wallAdjustDistance,ATC.wallAdjustMaxTime,ATC.wallAdjustPower);
 //Pick from wall and hang 2nd Blue
 
         claw.setPosition(clawCatchTightPose);
@@ -247,9 +255,9 @@ public class AutonRASubmsBS3 extends LinearOpMode {
 
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
                 .setReversed(false)
-                .splineToLinearHeading(new Pose2d(0,-46,Math.toRadians(-90)),Math.toRadians(60),
+                .splineToLinearHeading(new Pose2d(0,-40,Math.toRadians(-90)),Math.toRadians(60),
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                        SampleMecanumDrive.getAccelerationConstraint(60.0))
                 .build();
         drive.followTrajectorySequence(trajSequence);
         calibrationFromLimeLight = new CalibrationFromLimeLight();
@@ -263,6 +271,7 @@ public class AutonRASubmsBS3 extends LinearOpMode {
                 break;
             }
         }
+
         telemetry.addData("resultCordinates[1]",resultCordinates[1]);
         telemetry.addData("resultCordinates[2]",resultCordinates[2]);
 
@@ -278,7 +287,7 @@ public class AutonRASubmsBS3 extends LinearOpMode {
 
         trajSequence = drive.trajectorySequenceBuilder(correctedPose)
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(6,-37,Math.toRadians(-90)))
+                .lineToLinearHeading(new Pose2d(7,-37,Math.toRadians(-90)))
                 .addDisplacementMarker(1, () -> {
                     setSlider(vSlider, vSliderSubmHighPose, vSliderVelocity);
                     claw.setPosition(clawCatchTightPose);
@@ -287,6 +296,7 @@ public class AutonRASubmsBS3 extends LinearOpMode {
                 })
                 .build();
         drive.followTrajectorySequence(trajSequence);
+        atCommons.selfAdjust(ATC.submAdjustDistance,ATC.submAdjustMaxTime,ATC.submAdjustPower);
 
 
         /*calibrationFromLimeLight = new CalibrationFromLimeLight();
@@ -329,19 +339,19 @@ public class AutonRASubmsBS3 extends LinearOpMode {
         claw.setPosition(clawCatchTightPose);
         clawWrist.setPosition(clawWristHangPose);
         clawArm.setPosition(clawArmHangPose);
-        setSlider(vSlider,ATC.vSliderSubmLowPose,750);
+        setSlider(vSlider,ATC.vSliderSubmLowPose,ATC.vSliderHangVelocity);
 
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-300) {
-
+        while (ATC.vSliderSubmHighPose-vSlider.getCurrentPosition() < ATC.submHangStage1Diff) {
+            atCommons.startSelfAdjustAsync(ATC.submAdjustDistance,ATC.submAdjustPower);
         }
 
         clawArm.setPosition(clawArmWallPose);
         clawWrist.setPosition(clawWristDropPose);
 
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-400 ) {
-
+        while (ATC.vSliderSubmHighPose-vSlider.getCurrentPosition() < ATC.submHangStage2Diff ) {
+            //atCommons.startSelfAdjustAsync(ATC.submAdjustDistance,ATC.submAdjustPower);
         }
-
+        atCommons.stopSelfAdjustAsync();
         claw.setPosition(clawReleasePose);
         clawArm.setPosition(clawArmBasePose);
         clawWrist.setPosition(clawWristBasePose);
@@ -355,17 +365,17 @@ public class AutonRASubmsBS3 extends LinearOpMode {
 
                 .setReversed(false)
                 .splineToLinearHeading(new Pose2d(47,-50,Math.toRadians(90)),Math.toRadians(-90),
-                        SampleMecanumDrive.getVelocityConstraint(45.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(60))
                 .addDisplacementMarker(20, () -> {
                     clawArm.setPosition(clawArmWallPose);
                     clawWrist.setPosition(clawWristWallPose);
                     claw.setPosition(clawReleasePose);
                 })
-                .lineToLinearHeading(new Pose2d(47,-57,Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(47,-56,Math.toRadians(90)))
                 .build();
         drive.followTrajectorySequence(trajSequence);
-
+        atCommons.selfAdjust(ATC.wallAdjustDistance,ATC.wallAdjustMaxTime,ATC.wallAdjustPower);
 //Pick from wall and hang 3nd Blue
 
         claw.setPosition(clawCatchTightPose);
@@ -375,7 +385,7 @@ public class AutonRASubmsBS3 extends LinearOpMode {
 
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
                 .setReversed(false)
-                .splineToLinearHeading(new Pose2d(0,-46,Math.toRadians(-90)),Math.toRadians(60),
+                .splineToLinearHeading(new Pose2d(0,-40,Math.toRadians(-90)),Math.toRadians(60),
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
@@ -407,7 +417,7 @@ public class AutonRASubmsBS3 extends LinearOpMode {
 
         trajSequence = drive.trajectorySequenceBuilder(correctedPose)
                 .setReversed(false)
-                .lineToLinearHeading(new Pose2d(0,-37,Math.toRadians(-90)))
+                .lineToLinearHeading(new Pose2d(5,-37,Math.toRadians(-90)))
                 .addDisplacementMarker(1, () -> {
                     setSlider(vSlider, vSliderSubmHighPose, vSliderVelocity);
                     claw.setPosition(clawCatchTightPose);
@@ -416,22 +426,23 @@ public class AutonRASubmsBS3 extends LinearOpMode {
                 })
                 .build();
         drive.followTrajectorySequence(trajSequence);
+        atCommons.selfAdjust(ATC.submAdjustDistance,ATC.submAdjustMaxTime,ATC.submAdjustPower);
         claw.setPosition(clawCatchTightPose);
         clawWrist.setPosition(clawWristHangPose);
         clawArm.setPosition(clawArmHangPose);
-        setSlider(vSlider,ATC.vSliderSubmLowPose,750);
+        setSlider(vSlider,ATC.vSliderSubmLowPose,ATC.vSliderHangVelocity);
 
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-300) {
-
+        while (ATC.vSliderSubmHighPose-vSlider.getCurrentPosition() < ATC.submHangStage1Diff) {
+            atCommons.startSelfAdjustAsync(ATC.submAdjustDistance,ATC.submAdjustPower);
         }
 
         clawArm.setPosition(clawArmWallPose);
         clawWrist.setPosition(clawWristDropPose);
 
-        while (vSlider.getCurrentPosition() > ATC.vSliderSubmHighPose-400 ) {
-
+        while (ATC.vSliderSubmHighPose-vSlider.getCurrentPosition() < ATC.submHangStage2Diff) {
+            //atCommons.startSelfAdjustAsync(ATC.submAdjustDistance,ATC.submAdjustPower);
         }
-
+        atCommons.stopSelfAdjustAsync();
         claw.setPosition(clawReleasePose);
         clawArm.setPosition(clawArmBasePose);
         clawWrist.setPosition(clawWristBasePose);

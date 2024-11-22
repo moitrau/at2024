@@ -17,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.CalibrationFromLimeLight;
 import org.firstinspires.ftc.teamcode.ATCommons;
 import org.firstinspires.ftc.teamcode.drive.ATC;
+import org.firstinspires.ftc.teamcode.drive.ATCache;
 import org.firstinspires.ftc.teamcode.drive.ATE;
 import org.firstinspires.ftc.teamcode.drive.ATRoboTimer;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
@@ -114,6 +115,7 @@ public class AutonBASubmBS3 extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+
 //Hardware Initialization
         rightRear = hardwareMap.get(DcMotor.class, "rearRight");
         rightFront = hardwareMap.get(DcMotor.class, "frontRight");
@@ -184,13 +186,17 @@ public class AutonBASubmBS3 extends LinearOpMode {
             i++;
             resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIght();
             if(resultCordinates[1] > 10.0){
+                ATCache.rrllDeltaY = rrllDeltaY;
+                ATCache.rrllDeltaHeading = rrllDeltaHeading;
                 break;
             }
         }
         rrllDeltaY = trajSequence.end().getY() - resultCordinates[1];
         rrllDeltaHeading = Math.toDegrees(trajSequence.end().getHeading())-resultCordinates[2];
+
         telemetry.addData("rrllDeltaY",rrllDeltaY);
         telemetry.addData("rrllDeltaHeading",rrllDeltaHeading);
+        telemetry.update();
 
         claw.setPosition(clawCatchTightPose);
         clawWrist.setPosition(clawWristHangPose);
@@ -442,16 +448,7 @@ public class AutonBASubmBS3 extends LinearOpMode {
         clawWrist.setPosition(clawWristBasePose);
         resetSlider(vSlider, vtSensor, 2);
 
-// Park
 
-  /*      trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
-                .setReversed(false)
-                .lineToLinearHeading(new Pose2d(-54,54,Math.toRadians(90)),
-                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .build();*/
-        //drive.followTrajectorySequence(trajSequence);
-        clawWrist.setPosition(clawWristWallPose);
     }
 
     private void setSlider(DcMotor slider, int targetPose, int velocity) {
@@ -493,5 +490,4 @@ public class AutonBASubmBS3 extends LinearOpMode {
             return ATE.SampleSensorState.NONE;
         }
     }
-
 }
