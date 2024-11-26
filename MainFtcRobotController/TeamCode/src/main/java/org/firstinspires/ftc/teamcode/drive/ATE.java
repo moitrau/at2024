@@ -25,6 +25,7 @@ public class ATE {
         SUBM_HIGH,
         BASK_LOW,
         BASK_HIGH,
+        SUBM_PULLUP,
         SPECIMEN_SWIPE
     };
     public enum IntakeWristState {

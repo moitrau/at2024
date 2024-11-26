@@ -379,11 +379,11 @@ public class TeleopBlueAllianceNoviBasket extends LinearOpMode {
 //Specimen code starts
 
             if(gamepad1.a && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
-                clawArm.setPosition(ATC.clawArmFloorPose);
-                clawWrist.setPosition(ATC.clawWristFloorPose);
+                clawArm.setPosition(ATC.clawArmWallPose);
+                clawWrist.setPosition(ATC.clawWristWallPose);
                 sleep(250);
                 claw.setPosition(clawReleasePose);
-                clawWristState = ATE.ClawWristState.PICK_FLOOR;
+                clawWristState = ATE.ClawWristState.PICK_WALL;
             }
 
             if(gamepad1.dpad_up && gamepad1.left_bumper ){
@@ -429,8 +429,8 @@ public class TeleopBlueAllianceNoviBasket extends LinearOpMode {
                 claw.setPosition(clawCatchTightPose);
                 clawWrist.setPosition(clawWristHangPose);
                 clawArm.setPosition(clawArmHangPose);
-                setSlider(vSlider,ATC.vSliderSubmLowPose,750);
-                vSliderState = ATE.VerticalSliderState.SUBM_LOW;
+                setSlider(vSlider,ATC.vSliderSubmPullUpPose+50,10000);
+                vSliderState = ATE.VerticalSliderState.SUBM_PULLUP;
                 //clawWrist.getController().pwmDisable();
                 clawArmState = ATE.ClawArmState.HANG;
             }
@@ -526,7 +526,7 @@ public class TeleopBlueAllianceNoviBasket extends LinearOpMode {
             }
 */
 
-            if( vSlider.getCurrentPosition() <= ATC.vSliderSubmHighPose-200  && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
+           /* if( vSlider.getCurrentPosition() <= ATC.vSliderSubmHighPose-200  && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
                 clawArm.setPosition(clawArmWallPose);
                 clawWrist.setPosition(clawWristDropPose);
 
@@ -539,6 +539,18 @@ public class TeleopBlueAllianceNoviBasket extends LinearOpMode {
                 vSlider.setPower(-1);
                 clawArm.setPosition(clawArmBasePose);
                 clawWrist.setPosition(clawWristBasePose);
+                clawWristState = ATE.ClawWristState.BASE;
+                clawArmState = ATE.ClawArmState.BASE;
+
+            } */
+            if( vSlider.getCurrentPosition() >= ATC.vSliderSubmPullUpPose-20 && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_PULLUP ){
+                claw.setPosition(clawReleasePose);
+                clawArm.setPosition(clawArmBasePose);
+                clawWrist.setPosition(clawWristBasePose);
+                vSlider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                vSliderState = ATE.VerticalSliderState.EXTENDED;
+                vSlider.setPower(-1);
+
                 clawWristState = ATE.ClawWristState.BASE;
                 clawArmState = ATE.ClawArmState.BASE;
 
@@ -615,7 +627,7 @@ public class TeleopBlueAllianceNoviBasket extends LinearOpMode {
             telemetry.update();
             ///////Drive Code////////////
 
-            if(gamepad1.left_bumper ||  vSliderState == ATE.VerticalSliderState.SUBM_HIGH || clawWristState == ATE.ClawWristState.PICK_FLOOR){
+            if(gamepad1.left_bumper ||  vSliderState == ATE.VerticalSliderState.SUBM_HIGH || clawWristState == ATE.ClawWristState.PICK_FLOOR || clawWristState == ATE.ClawWristState.PICK_WALL){
                 drive.setWeightedDrivePower(
                         new Pose2d(
                                 -gamepad1.left_stick_y/4,

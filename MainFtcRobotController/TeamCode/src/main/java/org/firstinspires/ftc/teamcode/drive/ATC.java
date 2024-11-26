@@ -9,19 +9,19 @@ public class ATC {
     public static final double clawCatchLoosePose = 0.7;
     public static final double clawReleasePose = 0.4;
 
-    public static final double clawWristBasePose = 0.60;
-    public static final double clawWristIntakePose = 0.65;
-    public static final double clawWristHangPose = 0.0;
-    public static final double clawWristDropPose = 0.25;
-    public static final double clawWristWallPose = 0.25;
-    public static final double clawWristFloorPose = 0.25;
+    public static final double clawWristBasePose = 0.65;
+    public static final double clawWristIntakePose = 0.70;
+    public static final double clawWristHangPose = 0.05;
+    public static final double clawWristDropPose = 0.30;
+    public static final double clawWristWallPose = 0.20;
+    public static final double clawWristFloorPose = 0.30;
 
     public static final double clawArmBasePose = 0.55;
     public static final double clawArmIntakePose = 0.95;
-    public static final double clawArmHangPose = 0.45;
+    public static final double clawArmHangPose = 0.55;
     public static final double clawArmDropPose = 0.40;
-    public static final double clawArmWallPose = 0.30;
-    public static final double clawArmFloorPose = 0.0;
+    public static final double clawArmWallPose = 0.375;
+    public static final double clawArmFloorPose = 0.10;
 
     public static final double intakeWristBasePose = 0.50;
     public static final double intakeWristPickIntakePose = 0.55;
@@ -36,6 +36,7 @@ public class ATC {
     public static final int vSliderBasePose = 0;
     public static final int vSliderWallLiftPose = 375;
     public static final int vSliderSubmHighPose = 1150;
+    public static final int vSliderSubmPullUpPose = 1500;
     public static final int vSliderSubmMidPose = 900;
     public static final int vSliderSubmLowPose = 675;
     public static final int vSliderBaskHighPose = 2800;
@@ -43,7 +44,7 @@ public class ATC {
     public static final int vSliderBaskLowPose = 1400;
     public static final int vSliderSpecimenSwipePose = 900;
     public static final int vSliderVelocity=10000;
-    public static final int vSliderHangVelocity=750;
+    public static final int vSliderHangVelocity=10000;
 
     //Stage1 diff determines when to push the arm while going down
     public static final int submHangStage1Diff = 300;
@@ -69,7 +70,7 @@ public class ATC {
     public static final double wallAdjustMaxTime = 1;
     public static final double speciPickAdjustMaxTime = 3.0;
     //Below values are in cms
-    public static final double submAdjustDistance = 17.0;
+    public static final double submAdjustDistance = 10.0;
     public static final double wallAdjustDistance = 21.0;
     public static final double speciPickAdjustDistance = 14.3;
     //Power
