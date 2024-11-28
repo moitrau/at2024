@@ -75,7 +75,7 @@ public class AutonBABask3YS extends LinearOpMode {
     double intakeWristIntakePose = ATC.intakeWristIntakePose;
 
     double intakeWheelHaltPose = ATC.intakeWheelHaltPose;
-    double intakeWheelRunPose = ATC.intakeWristRunPose;
+    double intakeWheelRunPose = ATC.intakeWheelRunPose;
 
     int vSliderBasePose = ATC.vSliderBasePose;
     int vSliderSubmHighPose = ATC.vSliderSubmHighPose;
@@ -167,7 +167,7 @@ public class AutonBABask3YS extends LinearOpMode {
 //Drop First Yellow Start
         TrajectorySequence trajSequence = drive.trajectorySequenceBuilder(startPose).setReversed(true)
                 .splineToLinearHeading(new Pose2d(56, 56, Math.toRadians(-135)), Math.toRadians(90))
-                .addDisplacementMarker(1, () -> {
+                .addDisplacementMarker(0, () -> {
                     setSlider(vSlider, vSliderBaskHighPose, vSliderVelocity);
                 })
                 .build();
@@ -175,7 +175,7 @@ public class AutonBABask3YS extends LinearOpMode {
 
 
 
-        while ((vSliderBaskHighPose - vSlider.getCurrentPosition()) < 50) {
+        while ((vSliderBaskHighPose - vSlider.getCurrentPosition()) < 75) {
             telemetry.addData("Drop First Yellow vSlider Current Position", vSlider.getCurrentPosition());
             telemetry.update();
         }
@@ -198,6 +198,8 @@ public class AutonBABask3YS extends LinearOpMode {
                     clawArm.setPosition(clawArmBasePose);
                     clawWrist.setPosition(clawWristBasePose);
                     claw.setPosition(clawCatchTightPose);
+                })
+                .addDisplacementMarker(5, () -> {
                     setSlider(vSlider, 0, vSliderVelocity);
                 })
                 .splineToLinearHeading(new Pose2d(46, 42, Math.toRadians(-90)), Math.toRadians(90))
@@ -228,6 +230,9 @@ public class AutonBABask3YS extends LinearOpMode {
                 break;
             }
         }*/
+        clawWrist.setPosition(clawWristBasePose);
+        clawArm.setPosition(clawArmIntakePose);
+        claw.setPosition(clawReleasePose);
         resetSlider(vSlider, vtSensor, 2);
         resetSlider(hSlider, htSensor, 2);
         intakeWrist.setPosition(ATC.intakeWristConsumePose);
@@ -235,13 +240,12 @@ public class AutonBABask3YS extends LinearOpMode {
         intakeRW.setPosition(0.5);
         sleep(500);
         intakeWrist.setPosition(ATC.intakeWristPickIntakePose);
-        clawWrist.setPosition(clawWristBasePose);
-        clawArm.setPosition(clawArmIntakePose);
-        claw.setPosition(clawReleasePose);
-        sleep(750);
+
+        sleep(125);
         clawWrist.setPosition(clawWristIntakePose);
+        sleep(125);
         claw.setPosition(clawCatchLoosePose);
-        sleep(500);
+        sleep(250);
         clawArm.setPosition(clawArmBasePose);
 ///Drop Second Yellow Starts
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
@@ -253,7 +257,7 @@ public class AutonBABask3YS extends LinearOpMode {
         drive.followTrajectorySequence(trajSequence);
 
 
-        while ((vSliderBaskHighPose - vSlider.getCurrentPosition()) < 50) {
+        while ((vSliderBaskHighPose - vSlider.getCurrentPosition()) < 75) {
             telemetry.addData("Drop Second Yellow vSlider Current Position", vSlider.getCurrentPosition());
             telemetry.update();
         }
@@ -262,7 +266,7 @@ public class AutonBABask3YS extends LinearOpMode {
         clawWrist.setPosition(clawWristDropPose);
         sleep(250);
         claw.setPosition(clawReleasePose);
-        sleep(250);
+        //sleep(250);
 
 
 ///Drop Second Yellow Ends
@@ -305,6 +309,9 @@ public class AutonBABask3YS extends LinearOpMode {
                 break;
             }
         }*/
+        clawWrist.setPosition(clawWristBasePose);
+        clawArm.setPosition(clawArmIntakePose);
+        claw.setPosition(clawReleasePose);
         resetSlider(vSlider, vtSensor, 2);
         resetSlider(hSlider, htSensor, 2);
         intakeWrist.setPosition(ATC.intakeWristConsumePose);
@@ -312,13 +319,12 @@ public class AutonBABask3YS extends LinearOpMode {
         intakeRW.setPosition(0.5);
         sleep(500);
         intakeWrist.setPosition(ATC.intakeWristPickIntakePose);
-        clawWrist.setPosition(clawWristBasePose);
-        clawArm.setPosition(clawArmIntakePose);
-        claw.setPosition(clawReleasePose);
-        sleep(750);
+
+        sleep(125);
         clawWrist.setPosition(clawWristIntakePose);
+        sleep(125);
         claw.setPosition(clawCatchLoosePose);
-        sleep(500);
+        sleep(250);
         clawArm.setPosition(clawArmBasePose);
 ///Drop Third Yellow Starts
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
@@ -329,7 +335,7 @@ public class AutonBABask3YS extends LinearOpMode {
                 .build();
         drive.followTrajectorySequence(trajSequence);
 
-        while ((vSliderBaskHighPose - vSlider.getCurrentPosition()) < 100) {
+        while ((vSliderBaskHighPose - vSlider.getCurrentPosition()) < 75) {
             telemetry.addData("Drop Second Yellow vSlider Current Position", vSlider.getCurrentPosition());
             telemetry.update();
         }
@@ -353,21 +359,21 @@ public class AutonBABask3YS extends LinearOpMode {
                     setSlider(vSlider, 0, vSliderVelocity);
                 })
                 .setReversed(false)
-                .splineToLinearHeading(new Pose2d(59,14,Math.toRadians(-90)),Math.toRadians(60),
-                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .splineToLinearHeading(new Pose2d(59,14,Math.toRadians(-90)),Math.toRadians(60))
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(59,40,Math.toRadians(-90)),
-                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .lineToLinearHeading(new Pose2d(54,50,Math.toRadians(-90)),
-                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .lineToLinearHeading(new Pose2d(59,40,Math.toRadians(-90)))
+                //.lineToLinearHeading(new Pose2d(54,50,Math.toRadians(-90)))
+                .splineToLinearHeading(new Pose2d(17,12,Math.toRadians(-10)),Math.toRadians(150))
+                .addDisplacementMarker(40, () -> {
+                    setSlider(vSlider, ATC.vSliderWallLiftPose, vSliderVelocity);
+                })
                 //.splineToLinearHeading(new Pose2d(28,12,Math.toRadians(-180)),Math.toRadians(150),
                 //        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                 //        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
+        //setSlider(vSlider, 0, vSliderVelocity);
         drive.followTrajectorySequence(trajSequence);
+        clawArm.setPosition(clawArmWallPose);
 
 //Parking Ends
 
@@ -390,7 +396,7 @@ public class AutonBABask3YS extends LinearOpMode {
             telemetry.addData("MaxTimer", maxResetTime);
             telemetry.addData("VTimer", sliderTimer.elapsedTime());
             telemetry.update();
-            slider.setPower(-1);
+            slider.setPower(-0.7);
         }
         slider.setPower(0);
         slider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

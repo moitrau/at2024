@@ -83,7 +83,7 @@ public class AutonBASubmBS3v2 extends LinearOpMode {
     double intakeWristIntakePose = ATC.intakeWristIntakePose;
 
     double intakeWheelHaltPose = ATC.intakeWheelHaltPose;
-    double intakeWheelRunPose = ATC.intakeWristRunPose;
+    double intakeWheelRunPose = ATC.intakeWheelRunPose;
 
     int vSliderBasePose = ATC.vSliderBasePose;
     int vSliderSubmHighPose = ATC.vSliderSubmHighPose;
@@ -203,7 +203,7 @@ public class AutonBASubmBS3v2 extends LinearOpMode {
         clawArm.setPosition(clawArmHangPose);
         setSlider(vSlider,ATC.vSliderSubmPullUpPose,ATC.vSliderHangVelocity);
 
-        while (vSlider.getCurrentPosition() <=  ATC.vSliderSubmPullUpPose-20) {
+        while (vSlider.getCurrentPosition() <=  ATC.vSliderSubmPullUpPose-100) {
             atCommons.startSelfAdjustAsync(ATC.submAdjustDistance,ATC.submAdjustPower);
             telemetry.addData("Hang First Specimen vSlider Current Position1", vSlider.getCurrentPosition());
             //telemetry.update();
@@ -226,7 +226,7 @@ public class AutonBASubmBS3v2 extends LinearOpMode {
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(60.0))
                 .setReversed(true)
-                .lineToLinearHeading(new Pose2d(-45,56,Math.toRadians(-90)),
+                .lineToLinearHeading(new Pose2d(-45,60,Math.toRadians(-90)),
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(60.0))
                 .addDisplacementMarker(80, () -> {
@@ -335,7 +335,7 @@ public class AutonBASubmBS3v2 extends LinearOpMode {
 
         setSlider(vSlider,ATC.vSliderSubmPullUpPose,ATC.vSliderHangVelocity);
 
-        while (vSlider.getCurrentPosition() <=  ATC.vSliderSubmPullUpPose-20) {
+        while (vSlider.getCurrentPosition() <=  ATC.vSliderSubmPullUpPose-50) {
             atCommons.startSelfAdjustAsync(ATC.submAdjustDistance,ATC.submAdjustPower);
             telemetry.addData("Hang First Specimen vSlider Current Position1", vSlider.getCurrentPosition());
             //telemetry.update();
@@ -360,7 +360,7 @@ public class AutonBASubmBS3v2 extends LinearOpMode {
                     clawWrist.setPosition(clawWristWallPose);
                     claw.setPosition(clawReleasePose);
                 })
-                .lineToLinearHeading(new Pose2d(-47,56,Math.toRadians(-90)))
+                .lineToLinearHeading(new Pose2d(-47,60,Math.toRadians(-90)))
                 .build();
         drive.followTrajectorySequence(trajSequence);
         atCommons.selfAdjust(ATC.wallAdjustDistance,ATC.wallAdjustMaxTime,ATC.wallAdjustPower);
@@ -418,7 +418,7 @@ public class AutonBASubmBS3v2 extends LinearOpMode {
 
         setSlider(vSlider,ATC.vSliderSubmPullUpPose,ATC.vSliderHangVelocity);
 
-        while (vSlider.getCurrentPosition() <=  ATC.vSliderSubmPullUpPose-20) {
+        while (vSlider.getCurrentPosition() <=  ATC.vSliderSubmPullUpPose-50) {
             atCommons.startSelfAdjustAsync(ATC.submAdjustDistance,ATC.submAdjustPower);
             telemetry.addData("Hang First Specimen vSlider Current Position1", vSlider.getCurrentPosition());
             //telemetry.update();

@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -82,7 +80,7 @@ public class BasicTeleop extends LinearOpMode {
     double intakeWristIntakePose = ATC.intakeWristIntakePose;
 
     double intakeWheelHaltPose = ATC.intakeWheelHaltPose;
-    double intakeWheelRunPose = ATC.intakeWristRunPose;
+    double intakeWheelRunPose = ATC.intakeWheelRunPose;
 
     int vSliderBasePose = ATC.vSliderBasePose;
     int vSliderSubmHighPose = ATC.vSliderSubmHighPose;

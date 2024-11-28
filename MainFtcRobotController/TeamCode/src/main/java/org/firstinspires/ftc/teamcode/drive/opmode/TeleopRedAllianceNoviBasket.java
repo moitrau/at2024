@@ -19,9 +19,7 @@ import org.firstinspires.ftc.teamcode.CalibrationFromLimeLight;
 import org.firstinspires.ftc.teamcode.drive.ATC;
 import org.firstinspires.ftc.teamcode.drive.ATE;
 import org.firstinspires.ftc.teamcode.drive.ATRoboTimer;
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 /**
  * This is a simple teleop routine for testing localization. Drive the robot around like a normal
@@ -93,7 +91,7 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
     double intakeWristIntakePose = ATC.intakeWristIntakePose;
 
     double intakeWheelHaltPose = ATC.intakeWheelHaltPose;
-    double intakeWheelRunPose = ATC.intakeWristRunPose;
+    double intakeWheelRunPose = ATC.intakeWheelRunPose;
 
     int vSliderBasePose = ATC.vSliderBasePose;
     int vSliderSubmHighPose = ATC.vSliderSubmHighPose;
