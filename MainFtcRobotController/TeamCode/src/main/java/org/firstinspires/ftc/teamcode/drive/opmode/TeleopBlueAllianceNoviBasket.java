@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.ATCommons;
 import org.firstinspires.ftc.teamcode.CalibrationFromLimeLight;
 import org.firstinspires.ftc.teamcode.drive.ATC;
 import org.firstinspires.ftc.teamcode.drive.ATE;
@@ -120,6 +121,7 @@ public class TeleopBlueAllianceNoviBasket extends LinearOpMode {
     ATRoboTimer intakeTimer = new ATRoboTimer();
     ATRoboTimer orcaModeTimer = new ATRoboTimer();
     ATRoboTimer vSliderTimer = new ATRoboTimer();
+    private ATCommons atCommons;
 
     double[] llPose;
     double rrllDeltaY = 0.0;
@@ -158,7 +160,8 @@ public class TeleopBlueAllianceNoviBasket extends LinearOpMode {
         led3 = hardwareMap.get(LED.class, "led3");
         distanceSensor = hardwareMap.get(DistanceSensor.class, "distanceSensor");
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-
+        atCommons = new ATCommons();
+        atCommons.init(hardwareMap);
 //Set Drive Mode
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 //Initialize Poses
@@ -295,9 +298,9 @@ public class TeleopBlueAllianceNoviBasket extends LinearOpMode {
             if(sampleSensorState == ATE.SampleSensorState.NONE) {
                 sampleSensorState = getSampleSensorState(sampleSensor);
             }
-            //if(presampleSensorState == ATE.SampleSensorState.NONE) {
-            //    presampleSensorState = getSampleSensorState(sampleSensor);
-            //}
+            if(presampleSensorState == ATE.SampleSensorState.NONE) {
+                presampleSensorState = getSampleSensorState(presampleSensor);
+            }
 //Sample sensor code ends
             if(clawArmState == ATE.ClawArmState.PICK_INTAKE && clawWristState == ATE.ClawWristState.PICK_INTAKE && intakeWristState == ATE.IntakeWristState.PICK_INTAKE ) {
                 if(consumeTimer.isActive) {
@@ -435,6 +438,7 @@ public class TeleopBlueAllianceNoviBasket extends LinearOpMode {
 
 
             if(gamepad2.b && sampleSensorState == ATE.SampleSensorState.NONE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_HIGH ){
+                atCommons.selfAdjust(ATC.submAdjustDistance,ATC.submAdjustMaxTime,ATC.submAdjustPower);
                 claw.setPosition(clawCatchTightPose);
                 clawWrist.setPosition(clawWristHangPose);
                 clawArm.setPosition(clawArmHangPose);
@@ -611,6 +615,7 @@ public class TeleopBlueAllianceNoviBasket extends LinearOpMode {
             telemetry.addData("intakeWrist state", intakeWristState);
             telemetry.addData("intakeWheels state", intakeWheelsState);
             telemetry.addData("sample sensor state", sampleSensorState);
+            telemetry.addData("presample sensor state", presampleSensorState);
             telemetry.addData("hSlider state", hSliderState);
             telemetry.addData("vSlider state", vSliderState);
             telemetry.addData("hslider pos", hSlider.getCurrentPosition());
@@ -625,19 +630,22 @@ public class TeleopBlueAllianceNoviBasket extends LinearOpMode {
             telemetry.addData("pickTimer:",pickTimer.elapsedTime());
             telemetry.addData("HangerState:",hangerState);
             telemetry.addData("Hook Power:",rightHook.getPower());
-            telemetry.addData("Distance:",distanceSensor.getDistance(DistanceUnit.CM));
+
             ((NormalizedColorSensor) sampleSensor).setGain(2);
-            double distance = ((DistanceSensor) sampleSensor).getDistance(DistanceUnit.CM);
+            double distance = distanceSensor.getDistance(DistanceUnit.CM);
+            telemetry.addData("Distance:",distance);
             double hue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) sampleSensor).getNormalizedColors().toColor()), 0));
             telemetry.addData("Sample Sensor Hue:",hue);
-            //((NormalizedColorSensor) presampleSensor).setGain(2);
+            ((NormalizedColorSensor) presampleSensor).setGain(2);
             //double predistance = ((DistanceSensor) presampleSensor).getDistance(DistanceUnit.CM);
-            //double prehue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) presampleSensor).getNormalizedColors().toColor()), 0));
-            //telemetry.addData("PreSample Sensor Hue:",prehue);
+            double prehue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) presampleSensor).getNormalizedColors().toColor()), 0));
+            telemetry.addData("PreSample Sensor Hue:",prehue);
             telemetry.update();
             ///////Drive Code////////////
 
-            if(gamepad1.left_bumper ||  vSliderState == ATE.VerticalSliderState.SUBM_HIGH || clawWristState == ATE.ClawWristState.PICK_FLOOR || clawWristState == ATE.ClawWristState.PICK_WALL){
+            if (vSliderState == ATE.VerticalSliderState.SUBM_HIGH && distance <= ATC.speciPickAdjustDistance && gamepad1.left_stick_y > 0){
+////Do nothing
+            } else if(gamepad1.left_bumper ||  vSliderState == ATE.VerticalSliderState.SUBM_HIGH || clawWristState == ATE.ClawWristState.PICK_FLOOR || clawWristState == ATE.ClawWristState.PICK_WALL){
                 drive.setWeightedDrivePower(
                         new Pose2d(
                                 -gamepad1.left_stick_y/4,
@@ -645,8 +653,6 @@ public class TeleopBlueAllianceNoviBasket extends LinearOpMode {
                                 -gamepad1.right_stick_x/4
                         )
                 );
-            }else if (distanceSensor.getDistance(DistanceUnit.CM) <= ATC.speciPickAdjustDistance && gamepad1.left_stick_y > 0){
-////Do nothing
             }else{
                 drive.setWeightedDrivePower(
                         new Pose2d(

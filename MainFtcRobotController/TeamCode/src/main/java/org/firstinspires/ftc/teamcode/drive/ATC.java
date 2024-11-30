@@ -53,7 +53,7 @@ public class ATC {
 
     public static final int hSliderBasePose = 0;
     public static final int hSliderMinPose = 470;
-    public static final int hSliderMaxPose = 1430;
+    public static final int hSliderMaxPose = 1700;
     public static final int hSliderVelocity=10000;
 
     public static final double intakeWristMaxTime = 1.0;
