@@ -20,7 +20,7 @@ public class ATC {
     public static final double clawArmIntakePose = 0.95;
     public static final double clawArmHangPose = 0.58;
     public static final double clawArmDropPose = 0.40;
-    public static final double clawArmWallPose = 0.51;
+    public static final double clawArmWallPose = 0.47;
     public static final double clawArmFloorPose = 0.10;
 
     public static final double intakeWristBasePose = 0.32;
@@ -66,8 +66,8 @@ public class ATC {
     public static final double dropMaxTime = 0.5;
     public static final double outtakeMaxTime = 2.0;
     public static final double orcaModeMaxTime = 3.0;
-    public static final double submAdjustMaxTime = 1;
-    public static final double wallAdjustMaxTime = 1;
+    public static final double submAdjustMaxTime = 5;
+    public static final double wallAdjustMaxTime = 5;
     public static final double speciPickAdjustMaxTime = 3.0;
     //Below values are in cms
     public static final double submAdjustDistance = 10.0;

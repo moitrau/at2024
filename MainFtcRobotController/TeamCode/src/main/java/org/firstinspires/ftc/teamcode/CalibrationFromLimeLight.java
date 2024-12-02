@@ -140,6 +140,49 @@ public class CalibrationFromLimeLight  {
 
         return resultCordinates;
     }
+    public double [] CalibratePoseWithLimelIghtRaw()
+    {
+
+        int loop = 0;
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        //telemetry.setMsTransmissionInterval(11);
+        limelight.pipelineSwitch(0);
+        limelight.start();
+
+        while (loop < 5) {
+            LLStatus status = limelight.getStatus();
+            resultCordinates[0] = 0;
+            resultCordinates[1] = 0;
+            resultCordinates[2] = 0;
+
+            LLResult result = limelight.getLatestResult();
+            if (result != null) {
+                // Access general information
+                Pose3D botpose = result.getBotpose();
+
+                if (result.isValid()) {
+
+                    YawPitchRollAngles orientation = botpose.getOrientation();
+
+                    if(botpose.getPosition().y * 39.3701 > 10.0 || botpose.getPosition().y * 39.3701 < -10.0){
+
+                        resultCordinates[0] = botpose.getPosition().x * 39.3701;
+                        resultCordinates[1] = botpose.getPosition().y * 39.3701;
+                        resultCordinates[2] = orientation.getYaw();
+                        limelight.stop();
+                        return resultCordinates;
+                    }
+
+                }
+            }
+
+            loop++;
+
+        }
+
+        limelight.stop();
+        return resultCordinates;
+    }
 
     public static double getFinalMean (double[] array){
         double mean = calculateMean(array);

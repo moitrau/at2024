@@ -266,7 +266,7 @@ public class TeleopBlueAllianceNoviBasket extends LinearOpMode {
 
 //Intake-Outtake code for sample starts
             //Below code is to start outtake
-            if ( ((gamepad1.y && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) || sampleSensorState == ATE.SampleSensorState.RED) && hSliderState == ATE.HorizontalSliderState.EXTENDED ) {
+            if ( ((gamepad1.y && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) || sampleSensorState == ATE.SampleSensorState.RED || presampleSensorState == ATE.SampleSensorState.RED || (sampleSensorState != ATE.SampleSensorState.NONE && presampleSensorState != ATE.SampleSensorState.NONE )) && hSliderState == ATE.HorizontalSliderState.EXTENDED ) {
                 intakeLW.setDirection(Servo.Direction.FORWARD);
                 intakeRW.setDirection(Servo.Direction.REVERSE);
                 intakeLW.setPosition(0.9);
@@ -298,9 +298,9 @@ public class TeleopBlueAllianceNoviBasket extends LinearOpMode {
             if(sampleSensorState == ATE.SampleSensorState.NONE) {
                 sampleSensorState = getSampleSensorState(sampleSensor);
             }
-            if(presampleSensorState == ATE.SampleSensorState.NONE) {
-                presampleSensorState = getSampleSensorState(presampleSensor);
-            }
+
+            presampleSensorState = getPreSampleSensorState(presampleSensor);
+
 //Sample sensor code ends
             if(clawArmState == ATE.ClawArmState.PICK_INTAKE && clawWristState == ATE.ClawWristState.PICK_INTAKE && intakeWristState == ATE.IntakeWristState.PICK_INTAKE ) {
                 if(consumeTimer.isActive) {
@@ -634,12 +634,15 @@ public class TeleopBlueAllianceNoviBasket extends LinearOpMode {
             ((NormalizedColorSensor) sampleSensor).setGain(2);
             double distance = distanceSensor.getDistance(DistanceUnit.CM);
             telemetry.addData("Distance:",distance);
+            double sampdistance = ((DistanceSensor) sampleSensor).getDistance(DistanceUnit.CM);
             double hue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) sampleSensor).getNormalizedColors().toColor()), 0));
             telemetry.addData("Sample Sensor Hue:",hue);
+            telemetry.addData("Sample Sensor Distance:",sampdistance);
             ((NormalizedColorSensor) presampleSensor).setGain(2);
-            //double predistance = ((DistanceSensor) presampleSensor).getDistance(DistanceUnit.CM);
+            double presampdistance = ((DistanceSensor) presampleSensor).getDistance(DistanceUnit.CM);
             double prehue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) presampleSensor).getNormalizedColors().toColor()), 0));
             telemetry.addData("PreSample Sensor Hue:",prehue);
+            telemetry.addData("PreSample Sensor Distance:",presampdistance);
             telemetry.update();
             ///////Drive Code////////////
 
@@ -743,11 +746,27 @@ public class TeleopBlueAllianceNoviBasket extends LinearOpMode {
 
         double hue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) colSensor).getNormalizedColors().toColor()), 0));
 
-        if (distance <= 4 && hue >= 200 && hue <= 240) {
+        if (distance <= 4 && hue >= 200 && hue <= 250) {
             return ATE.SampleSensorState.BLUE;
         } else if (distance <= 4 && hue >= 65 && hue <= 100) {
             return ATE.SampleSensorState.YELLOW;
         } else if (distance <= 4 && hue >= 0 && hue <= 60) {
+            return ATE.SampleSensorState.RED;
+        } else {
+            return ATE.SampleSensorState.NONE;
+        }
+    }
+    private ATE.SampleSensorState getPreSampleSensorState(ColorSensor colSensor){
+        ((NormalizedColorSensor) colSensor).setGain(2);
+        double distance = ((DistanceSensor) colSensor).getDistance(DistanceUnit.CM);
+
+        double hue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) colSensor).getNormalizedColors().toColor()), 0));
+
+        if (distance <= 2.8 && hue >= 200 && hue <= 250) {
+            return ATE.SampleSensorState.BLUE;
+        } else if (distance <= 2.8 && hue >= 55 && hue <= 100) {
+            return ATE.SampleSensorState.YELLOW;
+        } else if (distance <= 2.8 && hue >= 0 && hue <= 50) {
             return ATE.SampleSensorState.RED;
         } else {
             return ATE.SampleSensorState.NONE;

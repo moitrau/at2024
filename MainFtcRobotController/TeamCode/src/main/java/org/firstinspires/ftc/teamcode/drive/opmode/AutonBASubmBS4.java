@@ -28,8 +28,8 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 /*
  * This is an example of a more complex path to really test the tuning.
  */
-@Autonomous(name = "04_BlueSubmers3BSv2")
-public class AutonBASubmBS3v2 extends LinearOpMode {
+@Autonomous(name = "04_BlueSubmers4BS")
+public class AutonBASubmBS4 extends LinearOpMode {
 
 
     ATE.ClawState clawState = ATE.ClawState.CATCH;
@@ -39,7 +39,7 @@ public class AutonBASubmBS3v2 extends LinearOpMode {
     ATE.IntakeWristState intakeWristState = ATE.IntakeWristState.BASE;
     ATE.HorizontalSliderState hSliderState = ATE.HorizontalSliderState.BASE;
     ATE.VerticalSliderState vSliderState = ATE.VerticalSliderState.BASE;
-    ATE.SampleSensorState sampleSensorState = ATE.SampleSensorState.NONE;
+    ATE.SampleSensorState presampleSensorState = ATE.SampleSensorState.NONE;
 
     private DcMotor rightRear;
     private DcMotor rightFront;
@@ -55,7 +55,7 @@ public class AutonBASubmBS3v2 extends LinearOpMode {
     private Servo intakeWrist;
     private Servo intakeLW;
     private Servo intakeRW;
-    private ColorSensor sampleSensor;
+    private ColorSensor presampleSensor;
     private DistanceSensor distanceSensor;
     private TouchSensor vtSensor;
     private TouchSensor htSensor;
@@ -136,7 +136,7 @@ public class AutonBASubmBS3v2 extends LinearOpMode {
         intakeRW = hardwareMap.get(Servo.class, "intakeRW");
         htSensor = hardwareMap.get(TouchSensor.class, "htSensor");
         vtSensor = hardwareMap.get(TouchSensor.class, "vtSensor");
-        sampleSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+        presampleSensor = hardwareMap.get(ColorSensor.class, "precolorSensor");
         distanceSensor = hardwareMap.get(DistanceSensor.class, "distanceSensor");
 
 
@@ -180,31 +180,26 @@ public class AutonBASubmBS3v2 extends LinearOpMode {
 
         calibrationFromLimeLight = new CalibrationFromLimeLight();
         calibrationFromLimeLight.LimeLight3A(0, 0, 0, 0.5, hardwareMap);
-        int i = 0;
-        double[] resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIght();
-        atCommons.selfAdjust(ATC.submAdjustDistance,ATC.submAdjustMaxTime,ATC.submAdjustPower);
-        while(i<100){
-            i++;
-            resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIght();
-            if(resultCordinates[1] > 10.0){
-                ATCache.rrllDeltaY = rrllDeltaY;
-                ATCache.rrllDeltaHeading = rrllDeltaHeading;
-                break;
-            }
+
+        double[] resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIghtRaw();
+        if(resultCordinates[1] > 10) {
+            //limelightCorrectionActive = true;
+            rrllDeltaY = trajSequence.end().getY() - resultCordinates[1];
+            rrllDeltaHeading = Math.toDegrees(trajSequence.end().getHeading()) - resultCordinates[2];
         }
-        rrllDeltaY = trajSequence.end().getY() - resultCordinates[1];
-        rrllDeltaHeading = Math.toDegrees(trajSequence.end().getHeading())-resultCordinates[2];
 
         telemetry.addData("rrllDeltaY",rrllDeltaY);
         telemetry.addData("rrllDeltaHeading",rrllDeltaHeading);
         telemetry.update();
+
+        atCommons.selfAdjust(ATC.submAdjustDistance,ATC.submAdjustMaxTime,ATC.submAdjustPower);
 
         claw.setPosition(clawCatchTightPose);
         clawWrist.setPosition(clawWristHangPose);
         clawArm.setPosition(clawArmHangPose);
         setSlider(vSlider,ATC.vSliderSubmPullUpPose,ATC.vSliderHangVelocity);
 
-        while (vSlider.getCurrentPosition() <=  ATC.vSliderSubmPullUpPose-100) {
+        while (vSlider.getCurrentPosition() <=  ATC.vSliderSubmPullUpPose-120) {
             atCommons.startSelfAdjustAsync(ATC.submAdjustDistance,ATC.submAdjustPower);
             telemetry.addData("Hang First Specimen vSlider Current Position1", vSlider.getCurrentPosition());
             //telemetry.update();
@@ -215,30 +210,110 @@ public class AutonBASubmBS3v2 extends LinearOpMode {
         clawWrist.setPosition(clawWristBasePose);
         resetSlider(vSlider, vtSensor, 2);
 //Hang first blue ends
-
-//Push One Blue
+//sleep(100000);
+//Push two Blue
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
 
                 .setReversed(false)
-                .splineToLinearHeading(new Pose2d(-36,34,Math.toRadians(-90)),Math.toRadians(-90),
+                .splineToLinearHeading(new Pose2d(-42,42,Math.toRadians(-110)),Math.toRadians(-90),
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(60.0))
-                .splineToLinearHeading(new Pose2d(-45,16,Math.toRadians(-90)),Math.toRadians(145),
-                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(60.0))
-                .setReversed(true)
-                .lineToLinearHeading(new Pose2d(-45,59,Math.toRadians(-90)),
-                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(60.0))
-                .addDisplacementMarker(80, () -> {
-                    clawArm.setPosition(clawArmWallPose);
-                    clawWrist.setPosition(clawWristWallPose);
-                    claw.setPosition(clawReleasePose);
-                    })
+                .addDisplacementMarker(3, () -> {
+                    setSlider(hSlider, hSliderMinPose, hSliderVelocity);
+
+                })
+                .addDisplacementMarker(40, () -> {
+                    intakeLW.setDirection(Servo.Direction.REVERSE);
+                    intakeRW.setDirection(Servo.Direction.FORWARD);
+                    intakeLW.setPosition(0.9);
+                    intakeRW.setPosition(0.9);
+                    intakeWrist.setPosition(ATC.intakeWristIntakePose);
+                    //sleep(500);
+                    setSlider(hSlider, hSliderMaxPose, 2000);
+                })
+                .build();
+        drive.followTrajectorySequence(trajSequence);
+        while (hSlider.isBusy()) {
+            presampleSensorState = getPreSampleSensorState(presampleSensor);
+            if (hSliderMaxPose - hSlider.getCurrentPosition() < 5 || presampleSensorState == ATE.SampleSensorState.BLUE) {
+                intakeLW.setPosition(0.5);
+                intakeRW.setPosition(0.5);
+                intakeWrist.setPosition(ATC.intakeWristBasePose);
+                break;
+            }
+        }
+
+        trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
+                .turn(Math.toRadians(-120))
+                .addDisplacementMarker(20, () -> {
+                    setSlider(hSlider, hSliderMaxPose-50, 10000);
+                })
                 .build();
         drive.followTrajectorySequence(trajSequence);
 
-        atCommons.selfAdjust(ATC.wallAdjustDistance,ATC.wallAdjustMaxTime,ATC.wallAdjustPower);
+        intakeWrist.setPosition(ATC.intakeWristOuttakePose);
+        intakeLW.setDirection(Servo.Direction.FORWARD);
+        intakeRW.setDirection(Servo.Direction.REVERSE);
+        intakeLW.setPosition(0.9);
+        intakeRW.setPosition(0.9);
+        sleep(300);
+        intakeLW.setPosition(0.5);
+        intakeRW.setPosition(0.5);
+        setSlider(hSlider, hSliderMaxPose-900, 10000);
+        trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
+                .turn(Math.toRadians(90))
+                .addDisplacementMarker(10, () -> {
+                    intakeLW.setDirection(Servo.Direction.REVERSE);
+                    intakeRW.setDirection(Servo.Direction.FORWARD);
+                    intakeLW.setPosition(0.9);
+                    intakeRW.setPosition(0.9);
+                    intakeWrist.setPosition(ATC.intakeWristIntakePose);
+                    //sleep(500);
+                    setSlider(hSlider, hSliderMaxPose, 2000);
+                })
+                .build();
+        drive.followTrajectorySequence(trajSequence);
+
+        while (hSlider.isBusy()) {
+            presampleSensorState = getPreSampleSensorState(presampleSensor);
+            if (hSliderMaxPose - hSlider.getCurrentPosition() < 5 || presampleSensorState == ATE.SampleSensorState.BLUE) {
+                intakeLW.setPosition(0.5);
+                intakeRW.setPosition(0.5);
+                break;
+            }
+        }
+        //setSlider(hSlider, hSliderMaxPose-300, 10000);
+        trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
+                .turn(Math.toRadians(-100))
+                .addDisplacementMarker(20, () -> {
+                    setSlider(hSlider, hSliderMaxPose-50, 10000);
+                })
+                .build();
+        drive.followTrajectorySequence(trajSequence);
+        intakeWrist.setPosition(ATC.intakeWristOuttakePose);
+        intakeLW.setDirection(Servo.Direction.FORWARD);
+        intakeRW.setDirection(Servo.Direction.REVERSE);
+        intakeLW.setPosition(0.9);
+        intakeRW.setPosition(0.9);
+        sleep(300);
+        intakeLW.setPosition(0.5);
+        intakeRW.setPosition(0.5);
+        resetSlider(hSlider, htSensor, 2);
+        trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
+                .turn(Math.toRadians(140))
+                .lineToLinearHeading(new Pose2d(-45,59,Math.toRadians(-90)),
+                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(60.0))
+                .addDisplacementMarker(1, () -> {
+                    clawArm.setPosition(clawArmWallPose);
+                    clawWrist.setPosition(clawWristWallPose);
+                    claw.setPosition(clawReleasePose);
+                })
+                .build();
+
+        drive.followTrajectorySequence(trajSequence);
+
+        atCommons.selfAdjust(ATC.wallAdjustDistance,ATC.wallAdjustMaxTime,0.35);
 //Pick from wall and hang 2nd Blue
 
         claw.setPosition(clawCatchTightPose);
@@ -246,7 +321,8 @@ public class AutonBASubmBS3v2 extends LinearOpMode {
         clawWrist.setPosition(clawWristDropPose);
         setSlider(vSlider,ATC.vSliderWallLiftPose,vSliderVelocity);
 
-
+        stop();
+        sleep(100000);
         trajSequence = drive.trajectorySequenceBuilder(trajSequence.end())
                 .setReversed(false)
                 .splineToLinearHeading(new Pose2d(-0,44,Math.toRadians(80)),Math.toRadians(-60),
@@ -259,7 +335,7 @@ public class AutonBASubmBS3v2 extends LinearOpMode {
         clawArm.setPosition(clawArmHangPose);
         calibrationFromLimeLight = new CalibrationFromLimeLight();
         calibrationFromLimeLight.LimeLight3A(0, 0, 0, 0.5, hardwareMap);
-        i = 0;
+        int i = 0;
         resultCordinates = calibrationFromLimeLight.CalibratePoseWithLimelIght();
         while(i<100){
             i++;
@@ -427,26 +503,9 @@ public class AutonBASubmBS3v2 extends LinearOpMode {
         claw.setPosition(clawReleasePose);
         clawArm.setPosition(clawArmBasePose);
         clawWrist.setPosition(clawWristBasePose);
-        setSlider(vSlider,0,ATC.vSliderHangVelocity);;
+        resetSlider(vSlider, vtSensor, 2);
 
-        trajSequence = drive.trajectorySequenceBuilder(correctedPose)
- /*               .setReversed(false)
 
-                .splineToLinearHeading(new Pose2d(-45,34,Math.toRadians(-90)),Math.toRadians(-90),
-                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .splineToLinearHeading(new Pose2d(-55,20,Math.toRadians(-90)),Math.toRadians(145),
-                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .setReversed(true)
-                .lineToLinearHeading(new Pose2d(-55,64,Math.toRadians(-90)),
-                        SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-*/
-                .setReversed(false)
-                .splineToLinearHeading(new Pose2d(-52,57,Math.toRadians(-180)),Math.toRadians(-180))
-                .build();
-        drive.followTrajectorySequence(trajSequence);
     }
 
     private void setSlider(DcMotor slider, int targetPose, int velocity) {
@@ -472,17 +531,17 @@ public class AutonBASubmBS3v2 extends LinearOpMode {
         slider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
-    private ATE.SampleSensorState getSampleSensorState() {
-        ((NormalizedColorSensor) sampleSensor).setGain(2);
-        double distance = ((DistanceSensor) sampleSensor).getDistance(DistanceUnit.CM);
+    private ATE.SampleSensorState getPreSampleSensorState(ColorSensor colSensor){
+        ((NormalizedColorSensor) colSensor).setGain(2);
+        double distance = ((DistanceSensor) colSensor).getDistance(DistanceUnit.CM);
 
-        double hue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) sampleSensor).getNormalizedColors().toColor()), 0));
+        double hue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) colSensor).getNormalizedColors().toColor()), 0));
 
-        if (distance <= 4 && hue >= 200 && hue <= 240) {
+        if (distance <= 2.8 && hue >= 200 && hue <= 250) {
             return ATE.SampleSensorState.BLUE;
-        } else if (distance <= 4 && hue >= 80 && hue <= 100) {
+        } else if (distance <= 2.8 && hue >= 55 && hue <= 100) {
             return ATE.SampleSensorState.YELLOW;
-        } else if (distance <= 4 && hue >= 0 && hue <= 60) {
+        } else if (distance <= 2.8 && hue >= 0 && hue <= 50) {
             return ATE.SampleSensorState.RED;
         } else {
             return ATE.SampleSensorState.NONE;

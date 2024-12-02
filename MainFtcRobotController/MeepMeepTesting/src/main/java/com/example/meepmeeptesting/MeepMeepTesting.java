@@ -17,12 +17,29 @@ public class MeepMeepTesting {
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(35, 35, Math.toRadians(180), Math.toRadians(180), 15)
-                .followTrajectorySequence(drive -> drive.trajectorySequenceBuilder(new Pose2d(32.5, 64, Math.toRadians(90)))
+                .followTrajectorySequence(drive -> drive.trajectorySequenceBuilder(new Pose2d(-9, 64, Math.toRadians(90)))
                         .setReversed(true)
-                        .splineToLinearHeading(new Pose2d(54,54,Math.toRadians(-135)),Math.toRadians(90))
+                        .lineToLinearHeading(new Pose2d(-9,38,Math.toRadians(90)))
                         .setReversed(false)
-                        .splineToLinearHeading(new Pose2d(50,46,Math.toRadians(-90)),Math.toRadians(90))
+
+                        .splineToLinearHeading(new Pose2d(-55,20,Math.toRadians(-90)),Math.toRadians(-90))
+                        .splineToLinearHeading(new Pose2d(-45,12,Math.toRadians(-90)),Math.toRadians(145))
                         .setReversed(true)
+                        .lineToLinearHeading(new Pose2d(-45,56,Math.toRadians(-90)))
+                        .setReversed(false)
+                        .splineToLinearHeading(new Pose2d(-54,12,Math.toRadians(-90)),Math.toRadians(145))
+                        .setReversed(true)
+                        .lineToLinearHeading(new Pose2d(-54,56,Math.toRadians(-90)))
+                        .setReversed(false)
+                        .splineToLinearHeading(new Pose2d(-64,12,Math.toRadians(-90)),Math.toRadians(145))
+                        .setReversed(true)
+                        .lineToLinearHeading(new Pose2d(-64,56,Math.toRadians(-90)))
+                        //.lineToLinearHeading(new Pose2d(-58,46,Math.toRadians(-90)))
+                        //.lineToLinearHeading(new Pose2d(-58,56,Math.toRadians(-90)))
+                        //.splineToLinearHeading(new Pose2d(-7,38,Math.toRadians(90)),Math.toRadians(-90))
+                        //.splineToLinearHeading(new Pose2d(-52,56,Math.toRadians(-90)),Math.toRadians(90))
+
+                        /*.setReversed(true)
                         .splineToLinearHeading(new Pose2d(54,54,Math.toRadians(-135)),Math.toRadians(90))
                         .setReversed(false)
                         .splineToLinearHeading(new Pose2d(58,46,Math.toRadians(-90)),Math.toRadians(90))
@@ -33,7 +50,7 @@ public class MeepMeepTesting {
                         .setReversed(true)
                         .lineToLinearHeading(new Pose2d(59,54,Math.toRadians(-90)))
                         .setReversed(false)
-                        .splineToLinearHeading(new Pose2d(28,12,Math.toRadians(-20)),Math.toRadians(150))
+                        .splineToLinearHeading(new Pose2d(28,12,Math.toRadians(-180)),Math.toRadians(150))*/
                         .build());
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTOTHEDEEP_JUICE_DARK)
