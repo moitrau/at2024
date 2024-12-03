@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.ATCommons;
 import org.firstinspires.ftc.teamcode.CalibrationFromLimeLight;
 import org.firstinspires.ftc.teamcode.drive.ATC;
 import org.firstinspires.ftc.teamcode.drive.ATE;
@@ -63,6 +64,7 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
     private ColorSensor presampleSensor;
     private TouchSensor vtSensor;
     private TouchSensor htSensor;
+    public DistanceSensor distanceSensor;
     private LED led0;
     private LED led1;
     private LED led2;
@@ -119,6 +121,7 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
     ATRoboTimer intakeTimer = new ATRoboTimer();
     ATRoboTimer orcaModeTimer = new ATRoboTimer();
     ATRoboTimer vSliderTimer = new ATRoboTimer();
+    private ATCommons atCommons;
 
     double[] llPose;
     double rrllDeltaY = 0.0;
@@ -155,8 +158,10 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
         led1 = hardwareMap.get(LED.class, "led1");
         led2 = hardwareMap.get(LED.class, "led2");
         led3 = hardwareMap.get(LED.class, "led3");
+        distanceSensor = hardwareMap.get(DistanceSensor.class, "distanceSensor");
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-
+        atCommons = new ATCommons();
+        atCommons.init(hardwareMap);
 //Set Drive Mode
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 //Initialize Poses
@@ -200,7 +205,6 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
         hSlider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
-
 //Wait till Play button is clicked on DriverHub
         waitForStart();
 
@@ -228,17 +232,21 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
             }
             //This is to make horizontal slider go back inside
             if (gamepad1.dpad_left && hSliderState != ATE.HorizontalSliderState.BASE) {
-                intakeWrist.setPosition(ATC.intakeWristBasePose);
-                hSlider.setPower(-0.7);
+                if(!gamepad1.x && ! gamepad1.y) {
+                    intakeWrist.setPosition(ATC.intakeWristBasePose);
+                }
+                hSlider.setPower(-1);
                 //Below if condition is to extend horizontal slider outside
             }else if(gamepad1.dpad_right && hSlider.getCurrentPosition()<=ATC.hSliderMaxPose){
                 hSliderState = ATE.HorizontalSliderState.EXTENDED;
                 intakeWristState = ATE.IntakeWristState.BASE;
-                intakeWrist.setPosition(ATC.intakeWristBasePose);
-                hSlider.setPower(0.7);
+                if(!gamepad1.x && ! gamepad1.y) {
+                    intakeWrist.setPosition(ATC.intakeWristBasePose);
+                }
+                hSlider.setPower(0.5);
                 //If no buttons are pressed move intake wrist to base position
             }else if(hangerState == ATE.HangerState.IDLE){
-                intakeWrist.setPosition(ATC.intakeWristBasePose);
+                //intakeWrist.setPosition(ATC.intakeWristBasePose);
                 hSlider.setPower(0);
             }
             //If horizontal slider state is BASE and Intake Wrist state is CONSUME, set horizontal slider power to 0 always
@@ -249,7 +257,7 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
             //If Vertical Slider touch sensor is pressed, and the state is EXTENDED or SUBM_HIGH or SUBM_LOW, set  STATE to BASE
             // also set power to 0 and reset encoder
             if(vtSensor.isPressed()){
-                if(vSliderState == ATE.VerticalSliderState.EXTENDED || vSliderState == ATE.VerticalSliderState.SUBM_HIGH || vSliderState == ATE.VerticalSliderState.SUBM_LOW ) {
+                if(vSliderState != ATE.VerticalSliderState.BASE ){//vSliderState == ATE.VerticalSliderState.EXTENDED || vSliderState == ATE.VerticalSliderState.SUBM_HIGH || vSliderState == ATE.VerticalSliderState.SUBM_LOW ) {
                     vSliderState = ATE.VerticalSliderState.BASE;
                     vSlider.setPower(0);
                     vSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -258,7 +266,7 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
 
 //Intake-Outtake code for sample starts
             //Below code is to start outtake
-            if ( ((gamepad1.y && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) || sampleSensorState == ATE.SampleSensorState.BLUE) && hSliderState == ATE.HorizontalSliderState.EXTENDED ) {
+            if ( ((gamepad1.y && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) || sampleSensorState == ATE.SampleSensorState.BLUE || presampleSensorState == ATE.SampleSensorState.BLUE || (sampleSensorState != ATE.SampleSensorState.NONE && presampleSensorState != ATE.SampleSensorState.NONE )) && hSliderState == ATE.HorizontalSliderState.EXTENDED ) {
                 intakeLW.setDirection(Servo.Direction.FORWARD);
                 intakeRW.setDirection(Servo.Direction.REVERSE);
                 intakeLW.setPosition(0.9);
@@ -276,6 +284,9 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
                 hSlider.setPower(-1);
                 intakeLW.setPosition(0.5);
                 intakeRW.setPosition(0.5);
+                clawWrist.setPosition(clawWristBasePose);
+                clawArm.setPosition(clawArmIntakePose);
+                claw.setPosition(clawReleasePose);
                 intakeWrist.setPosition(ATC.intakeWristBasePose);
             }else if( sampleSensorState == ATE.SampleSensorState.NONE && hSliderState == ATE.HorizontalSliderState.EXTENDED){
                 intakeLW.setPosition(0.5);
@@ -287,19 +298,20 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
             if(sampleSensorState == ATE.SampleSensorState.NONE) {
                 sampleSensorState = getSampleSensorState(sampleSensor);
             }
-            //if(presampleSensorState == ATE.SampleSensorState.NONE) {
-            //    presampleSensorState = getSampleSensorState(sampleSensor);
-            //}
+
+            presampleSensorState = getPreSampleSensorState(presampleSensor);
+
 //Sample sensor code ends
             if(clawArmState == ATE.ClawArmState.PICK_INTAKE && clawWristState == ATE.ClawWristState.PICK_INTAKE && intakeWristState == ATE.IntakeWristState.PICK_INTAKE ) {
                 if(consumeTimer.isActive) {
                     intakeWrist.setPosition(ATC.intakeWristConsumePose);
                     if (consumeTimer.elapsedTime() >= ATC.consumeMaxTime){
                         consumeTimer.stopTimer();
-                        grabTimer.startTimer();
+                        //grabTimer.startTimer();
+                        clawTimer.startTimer();
                     }
                 }
-                if(grabTimer.isActive) {
+                /*if(grabTimer.isActive) {
                     intakeWrist.setPosition(ATC.intakeWristPickIntakePose);
                     clawWrist.setPosition(clawWristBasePose);
                     clawArm.setPosition(clawArmIntakePose);
@@ -309,8 +321,9 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
                         grabTimer.stopTimer();
                         clawTimer.startTimer();
                     }
-                }
+                }*/
                 if (clawTimer.isActive) {
+                    intakeWrist.setPosition(ATC.intakeWristPickIntakePose);
                     clawWrist.setPosition(clawWristIntakePose);
                     claw.setPosition(clawCatchLoosePose);
                     if (clawTimer.elapsedTime() >= ATC.clawMaxTime){
@@ -378,11 +391,11 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
 //Specimen code starts
 
             if(gamepad1.a && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
-                clawArm.setPosition(ATC.clawArmFloorPose);
-                clawWrist.setPosition(ATC.clawWristFloorPose);
+                clawArm.setPosition(ATC.clawArmWallPose);
+                clawWrist.setPosition(ATC.clawWristWallPose);
                 sleep(250);
                 claw.setPosition(clawReleasePose);
-                clawWristState = ATE.ClawWristState.PICK_FLOOR;
+                clawWristState = ATE.ClawWristState.PICK_WALL;
             }
 
             if(gamepad1.dpad_up && gamepad1.left_bumper ){
@@ -392,7 +405,7 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
                 setSlider(vSlider,ATC.vSliderSpecimenSwipePose,vSliderVelocity);
                 vSliderState = ATE.VerticalSliderState.SPECIMEN_SWIPE;
             }
-            if(gamepad1.dpad_down && gamepad1.left_bumper ){
+            if(gamepad1.dpad_down && gamepad1.left_bumper){
                 clawArm.setPosition(clawArmBasePose);
                 clawWrist.setPosition(clawWristBasePose);
                 clawWristState = ATE.ClawWristState.BASE;
@@ -425,11 +438,12 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
 
 
             if(gamepad2.b && sampleSensorState == ATE.SampleSensorState.NONE && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_HIGH ){
+                atCommons.selfAdjust(ATC.submAdjustDistance,ATC.submAdjustMaxTime,ATC.submAdjustPower);
                 claw.setPosition(clawCatchTightPose);
                 clawWrist.setPosition(clawWristHangPose);
                 clawArm.setPosition(clawArmHangPose);
-                setSlider(vSlider,ATC.vSliderSubmLowPose,750);
-                vSliderState = ATE.VerticalSliderState.SUBM_LOW;
+                setSlider(vSlider,ATC.vSliderSubmPullUpPose+50,10000);
+                vSliderState = ATE.VerticalSliderState.SUBM_PULLUP;
                 //clawWrist.getController().pwmDisable();
                 clawArmState = ATE.ClawArmState.HANG;
             }
@@ -525,7 +539,7 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
             }
 */
 
-            if( vSlider.getCurrentPosition() <= ATC.vSliderSubmHighPose-200  && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
+           /* if( vSlider.getCurrentPosition() <= ATC.vSliderSubmHighPose-200  && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_LOW ){
                 clawArm.setPosition(clawArmWallPose);
                 clawWrist.setPosition(clawWristDropPose);
 
@@ -538,6 +552,18 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
                 vSlider.setPower(-1);
                 clawArm.setPosition(clawArmBasePose);
                 clawWrist.setPosition(clawWristBasePose);
+                clawWristState = ATE.ClawWristState.BASE;
+                clawArmState = ATE.ClawArmState.BASE;
+
+            } */
+            if( vSlider.getCurrentPosition() >= ATC.vSliderSubmPullUpPose-20 && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.SUBM_PULLUP ){
+                claw.setPosition(clawReleasePose);
+                clawArm.setPosition(clawArmBasePose);
+                clawWrist.setPosition(clawWristBasePose);
+                vSlider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                vSliderState = ATE.VerticalSliderState.EXTENDED;
+                vSlider.setPower(-1);
+
                 clawWristState = ATE.ClawWristState.BASE;
                 clawArmState = ATE.ClawArmState.BASE;
 
@@ -589,6 +615,7 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
             telemetry.addData("intakeWrist state", intakeWristState);
             telemetry.addData("intakeWheels state", intakeWheelsState);
             telemetry.addData("sample sensor state", sampleSensorState);
+            telemetry.addData("presample sensor state", presampleSensorState);
             telemetry.addData("hSlider state", hSliderState);
             telemetry.addData("vSlider state", vSliderState);
             telemetry.addData("hslider pos", hSlider.getCurrentPosition());
@@ -603,18 +630,25 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
             telemetry.addData("pickTimer:",pickTimer.elapsedTime());
             telemetry.addData("HangerState:",hangerState);
             telemetry.addData("Hook Power:",rightHook.getPower());
+
             ((NormalizedColorSensor) sampleSensor).setGain(2);
-            double distance = ((DistanceSensor) sampleSensor).getDistance(DistanceUnit.CM);
+            double distance = distanceSensor.getDistance(DistanceUnit.CM);
+            telemetry.addData("Distance:",distance);
+            double sampdistance = ((DistanceSensor) sampleSensor).getDistance(DistanceUnit.CM);
             double hue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) sampleSensor).getNormalizedColors().toColor()), 0));
             telemetry.addData("Sample Sensor Hue:",hue);
-            //((NormalizedColorSensor) presampleSensor).setGain(2);
-            //double predistance = ((DistanceSensor) presampleSensor).getDistance(DistanceUnit.CM);
-            //double prehue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) presampleSensor).getNormalizedColors().toColor()), 0));
-            //telemetry.addData("PreSample Sensor Hue:",prehue);
+            telemetry.addData("Sample Sensor Distance:",sampdistance);
+            ((NormalizedColorSensor) presampleSensor).setGain(2);
+            double presampdistance = ((DistanceSensor) presampleSensor).getDistance(DistanceUnit.CM);
+            double prehue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) presampleSensor).getNormalizedColors().toColor()), 0));
+            telemetry.addData("PreSample Sensor Hue:",prehue);
+            telemetry.addData("PreSample Sensor Distance:",presampdistance);
             telemetry.update();
             ///////Drive Code////////////
 
-            if(gamepad1.left_bumper ||  vSliderState == ATE.VerticalSliderState.SUBM_HIGH || clawWristState == ATE.ClawWristState.PICK_FLOOR){
+            if (vSliderState == ATE.VerticalSliderState.SUBM_HIGH && distance <= ATC.speciPickAdjustDistance && gamepad1.left_stick_y > 0){
+////Do nothing
+            } else if(gamepad1.left_bumper ||  vSliderState == ATE.VerticalSliderState.SUBM_HIGH || clawWristState == ATE.ClawWristState.PICK_FLOOR || clawWristState == ATE.ClawWristState.PICK_WALL){
                 drive.setWeightedDrivePower(
                         new Pose2d(
                                 -gamepad1.left_stick_y/4,
@@ -645,14 +679,7 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
                 vSliderState = ATE.VerticalSliderState.BASE;
                 sampleSensorState = ATE.SampleSensorState.NONE;
                 //presampleSensorState = ATE.SampleSensorState.NONE;
-                clawWrist.setPosition(clawWristDropPose);
-                clawArm.setPosition(clawArmDropPose);
-                sleep(500);
-                claw.setPosition(clawReleasePose);
-                sleep(500);
-                claw.setPosition(clawCatchTightPose);
-                clawArm.setPosition(clawArmBasePose);
-                clawWrist.setPosition(clawWristBasePose);
+
                 intakeLW.setPosition(intakeWheelHaltPose);
                 intakeRW.setPosition(intakeWheelHaltPose);
                 intakeWrist.setPosition(intakeWristBasePose);
@@ -684,7 +711,14 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
                 hSlider.setPower(0);
                 hSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 hSlider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
+                clawWrist.setPosition(clawWristDropPose);
+                clawArm.setPosition(clawArmDropPose);
+                sleep(500);
+                claw.setPosition(clawReleasePose);
+                sleep(500);
+                claw.setPosition(clawCatchTightPose);
+                clawArm.setPosition(clawArmBasePose);
+                clawWrist.setPosition(clawWristBasePose);
             }
 //Code to reset everything back to base position ends
         }
@@ -712,11 +746,27 @@ public class TeleopRedAllianceNoviBasket extends LinearOpMode {
 
         double hue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) colSensor).getNormalizedColors().toColor()), 0));
 
-        if (distance <= 4 && hue >= 200 && hue <= 240) {
+        if (distance <= 4 && hue >= 200 && hue <= 250) {
             return ATE.SampleSensorState.BLUE;
         } else if (distance <= 4 && hue >= 65 && hue <= 100) {
             return ATE.SampleSensorState.YELLOW;
         } else if (distance <= 4 && hue >= 0 && hue <= 60) {
+            return ATE.SampleSensorState.RED;
+        } else {
+            return ATE.SampleSensorState.NONE;
+        }
+    }
+    private ATE.SampleSensorState getPreSampleSensorState(ColorSensor colSensor){
+        ((NormalizedColorSensor) colSensor).setGain(2);
+        double distance = ((DistanceSensor) colSensor).getDistance(DistanceUnit.CM);
+
+        double hue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) colSensor).getNormalizedColors().toColor()), 0));
+
+        if (distance <= 2.8 && hue >= 200 && hue <= 250) {
+            return ATE.SampleSensorState.BLUE;
+        } else if (distance <= 2.8 && hue >= 55 && hue <= 100) {
+            return ATE.SampleSensorState.YELLOW;
+        } else if (distance <= 2.8 && hue >= 0 && hue <= 50) {
             return ATE.SampleSensorState.RED;
         } else {
             return ATE.SampleSensorState.NONE;

@@ -31,7 +31,7 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
  */
 @Disabled
 @Autonomous(name = "04_BlueSubmers3BSv2")
-public class AutonBASubmBS3v2 extends LinearOpMode {
+public class AutonBASubmBS3States extends LinearOpMode {
 
 
     ATE.ClawState clawState = ATE.ClawState.CATCH;

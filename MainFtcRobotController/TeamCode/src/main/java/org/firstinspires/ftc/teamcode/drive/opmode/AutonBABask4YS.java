@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.drive.opmode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -16,12 +17,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.ATC;
 import org.firstinspires.ftc.teamcode.drive.ATE;
 import org.firstinspires.ftc.teamcode.drive.ATRoboTimer;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 /*
  * This is an example of a more complex path to really test the tuning.
  */
+@Disabled
 @Autonomous(name = "01_BlueBasket4YS")
 public class AutonBABask4YS extends LinearOpMode {
 

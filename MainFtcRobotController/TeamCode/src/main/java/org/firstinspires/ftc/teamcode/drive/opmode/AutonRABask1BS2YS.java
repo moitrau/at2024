@@ -373,7 +373,7 @@ public class AutonRABask1BS2YS extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(-59,-40,Math.toRadians(90)),
                         SampleMecanumDrive.getVelocityConstraint(60.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .splineToLinearHeading(new Pose2d(-52,-55,Math.toRadians(90)),Math.toRadians(10),
+                .splineToLinearHeading(new Pose2d(52,-55,Math.toRadians(90)),Math.toRadians(10),
                         SampleMecanumDrive.getVelocityConstraint(50.0, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
