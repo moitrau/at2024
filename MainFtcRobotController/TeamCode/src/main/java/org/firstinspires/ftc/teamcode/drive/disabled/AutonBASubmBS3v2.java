@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode;
+package org.firstinspires.ftc.teamcode.drive.disabled;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -30,8 +30,8 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
  * This is an example of a more complex path to really test the tuning.
  */
 @Disabled
-@Autonomous(name = "03_BlueSubmers3BS")
-public class AutonBASubmBS3States extends LinearOpMode {
+@Autonomous(name = "04_BlueSubmers3BSv2")
+public class AutonBASubmBS3v2 extends LinearOpMode {
 
 
     ATE.ClawState clawState = ATE.ClawState.CATCH;
