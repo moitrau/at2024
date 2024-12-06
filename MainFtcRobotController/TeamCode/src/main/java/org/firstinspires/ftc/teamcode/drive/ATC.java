@@ -59,7 +59,7 @@ public class ATC {
     public static final double intakeWristMaxTime = 1.0;
     public static final double hSliderMaxTime = 10.0;
     public static final double vSliderMaxTime = 10.0;
-    public static final double consumeMaxTime = 0.75;
+    public static final double consumeMaxTime = 1.0;
     public static final double grabMaxTime = 0.75;
     public static final double clawMaxTime = 0.5;
     public static final double pickMaxTime = 0.5;

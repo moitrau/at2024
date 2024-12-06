@@ -187,7 +187,7 @@ public class AutonBABask1BS3YSStates extends LinearOpMode {
         clawArm.setPosition(clawArmHangPose);
         setSlider(vSlider,ATC.vSliderSubmPullUpPose,ATC.vSliderHangVelocity);
 
-        while (vSlider.getCurrentPosition() <=  ATC.vSliderSubmPullUpPose-100) {
+        while (vSlider.getCurrentPosition() <=  ATC.vSliderSubmPullUpPose-80) {
             telemetry.addData("Hang First Specimen vSlider Current Position1", vSlider.getCurrentPosition());
             //telemetry.update();
         }
@@ -207,7 +207,7 @@ public class AutonBABask1BS3YSStates extends LinearOpMode {
                     clawWrist.setPosition(clawWristBasePose);
                     claw.setPosition(clawCatchTightPose);
                 })
-                .splineToLinearHeading(new Pose2d(47, 40, Math.toRadians(-95)), Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(47, 40, Math.toRadians(-95)), Math.toRadians(-90))
                 .build();
         drive.followTrajectorySequence(trajSequence);
         while (hSlider.isBusy()) {

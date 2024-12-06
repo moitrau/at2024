@@ -770,9 +770,9 @@ public class TeleopBlueAllianceStates extends LinearOpMode {
 
         if (distance <= 2.8 && hue >= 200 && hue <= 250) {
             return ATE.SampleSensorState.BLUE;
-        } else if (distance <= 2.8 && hue >= 55 && hue <= 100) {
+        } else if (distance <= 2.8 && hue >= 41 && hue <= 100) {
             return ATE.SampleSensorState.YELLOW;
-        } else if (distance <= 2.8 && hue >= 0 && hue <= 50) {
+        } else if (distance <= 2.8 && hue >= 0 && hue <= 40) {
             return ATE.SampleSensorState.RED;
         } else {
             return ATE.SampleSensorState.NONE;

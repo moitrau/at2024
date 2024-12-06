@@ -188,7 +188,7 @@ public class AutonRABask1RS3YSStates extends LinearOpMode {
         clawArm.setPosition(clawArmHangPose);
         setSlider(vSlider,ATC.vSliderSubmPullUpPose,ATC.vSliderHangVelocity);
 
-        while (vSlider.getCurrentPosition() <=  ATC.vSliderSubmPullUpPose-100) {
+        while (vSlider.getCurrentPosition() <=  ATC.vSliderSubmPullUpPose-80) {
             telemetry.addData("Hang First Specimen vSlider Current Position1", vSlider.getCurrentPosition());
             //telemetry.update();
         }
