@@ -237,7 +237,7 @@ public class TeleopBlueAllianceStates extends LinearOpMode {
                 }
                 hSlider.setPower(-1);
                 //Below if condition is to extend horizontal slider outside
-            }else if(gamepad1.dpad_right && hSlider.getCurrentPosition()<=ATC.hSliderMaxPose){
+            }else if(gamepad1.dpad_right && clawWristState != ATE.ClawWristState.PICK_WALL && hSlider.getCurrentPosition()<=ATC.hSliderMaxPose){
                 hSliderState = ATE.HorizontalSliderState.EXTENDED;
                 intakeWristState = ATE.IntakeWristState.BASE;
                 if(!gamepad1.x && ! gamepad1.y) {
@@ -281,7 +281,7 @@ public class TeleopBlueAllianceStates extends LinearOpMode {
                 intakeRW.setPosition(0.9);
                 intakeWrist.setPosition(ATC.intakeWristIntakePose);
             }else if ((sampleSensorState == ATE.SampleSensorState.YELLOW || sampleSensorState == ATE.SampleSensorState.BLUE ) && hSliderState == ATE.HorizontalSliderState.EXTENDED){
-                hSlider.setPower(-1);
+                hSlider.setPower(-0.8);
                 intakeLW.setPosition(0.5);
                 intakeRW.setPosition(0.5);
                 clawWrist.setPosition(clawWristBasePose);
@@ -396,7 +396,7 @@ public class TeleopBlueAllianceStates extends LinearOpMode {
 
 //Specimen code starts
 
-            if(gamepad1.a && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
+            if(gamepad1.a && hSliderState != ATE.HorizontalSliderState.EXTENDED && sampleSensorState == ATE.SampleSensorState.NONE  && hSliderState == ATE.HorizontalSliderState.BASE && vSliderState == ATE.VerticalSliderState.BASE ){
                 clawArm.setPosition(ATC.clawArmWallPose);
                 clawWrist.setPosition(ATC.clawWristWallPose);
                 sleep(250);
@@ -763,16 +763,17 @@ public class TeleopBlueAllianceStates extends LinearOpMode {
         }
     }
     private ATE.SampleSensorState getPreSampleSensorState(ColorSensor colSensor){
+
         ((NormalizedColorSensor) colSensor).setGain(2);
         double distance = ((DistanceSensor) colSensor).getDistance(DistanceUnit.CM);
 
         double hue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) colSensor).getNormalizedColors().toColor()), 0));
 
-        if (distance <= 2.8 && hue >= 200 && hue <= 250) {
+        if (distance <= 5.5 && hue >= 200 && hue <= 250) {
             return ATE.SampleSensorState.BLUE;
-        } else if (distance <= 2.8 && hue >= 41 && hue <= 100) {
+        } else if (distance <= 5.5 && hue >= 41 && hue <= 100) {
             return ATE.SampleSensorState.YELLOW;
-        } else if (distance <= 2.8 && hue >= 0 && hue <= 40) {
+        } else if (distance <= 5.5 && hue >= 0 && hue <= 40) {
             return ATE.SampleSensorState.RED;
         } else {
             return ATE.SampleSensorState.NONE;
