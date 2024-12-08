@@ -676,6 +676,10 @@ public class TeleopRedAllianceStates extends LinearOpMode {
 //Code to reset everything back to base position starts
 
             if(gamepad1.left_bumper && gamepad1.right_bumper) {
+                if (hSliderState == ATE.HorizontalSliderState.EXTENDED){
+                    setSlider(hSlider, 1400, hSliderVelocity);
+                }
+
                 clawState = ATE.ClawState.CATCH;
                 clawArmState = ATE.ClawArmState.BASE;
                 clawWristState = ATE.ClawWristState.BASE;
@@ -689,7 +693,6 @@ public class TeleopRedAllianceStates extends LinearOpMode {
                 intakeLW.setPosition(intakeWheelHaltPose);
                 intakeRW.setPosition(intakeWheelHaltPose);
                 intakeWrist.setPosition(intakeWristBasePose);
-
 
                 vSliderTimerOld = resetTimer();
                 vSliderTimerOld = startTimer();

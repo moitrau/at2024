@@ -27,7 +27,7 @@ public class ATC {
     public static final double intakeWristPickIntakePose = 0.25;
     public static final double intakeWristConsumePose = 0.0;
     public static final double intakeWristOuttakePose = 0.46;
-    public static final double intakeWristIntakePose = 0.7;
+    public static final double intakeWristIntakePose = 0.74;
     //public static final double intakeWristIntakePose = 0.6;
     public static final double intakeWheelHaltPose = 0.5;
     public static final double intakeWheelRunPose = 0.9;
