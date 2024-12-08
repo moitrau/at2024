@@ -42,7 +42,7 @@ public class TeleopRedAllianceStatesv2 extends LinearOpMode {
     ATE.HorizontalSliderState hSliderState = ATE.HorizontalSliderState.BASE;
     ATE.VerticalSliderState vSliderState = ATE.VerticalSliderState.BASE;
     ATE.SampleSensorState sampleSensorState = ATE.SampleSensorState.NONE;
-    ATE.SampleSensorState presampleSensorState = ATE.SampleSensorState.NONE;
+    //ATE.SampleSensorState presampleSensorState = ATE.SampleSensorState.NONE;
     ATE.HangerState hangerState = ATE.HangerState.IDLE;
     ATE.OrcaModeState orcaModeState = ATE.OrcaModeState.DISABLED;
 
@@ -61,7 +61,7 @@ public class TeleopRedAllianceStatesv2 extends LinearOpMode {
     private Servo intakeLW;
     private Servo intakeRW;
     private ColorSensor sampleSensor;
-    private ColorSensor presampleSensor;
+    //private ColorSensor presampleSensor;
     private TouchSensor vtSensor;
     private TouchSensor htSensor;
     public DistanceSensor distanceSensor;
@@ -153,7 +153,7 @@ public class TeleopRedAllianceStatesv2 extends LinearOpMode {
         htSensor = hardwareMap.get(TouchSensor.class, "htSensor");
         vtSensor = hardwareMap.get(TouchSensor.class, "vtSensor");
         sampleSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
-        presampleSensor = hardwareMap.get(ColorSensor.class, "precolorSensor");
+        //presampleSensor = hardwareMap.get(ColorSensor.class, "precolorSensor");
         led0 = hardwareMap.get(LED.class, "led0");
         led1 = hardwareMap.get(LED.class, "led1");
         led2 = hardwareMap.get(LED.class, "led2");
@@ -266,13 +266,16 @@ public class TeleopRedAllianceStatesv2 extends LinearOpMode {
 
 //Intake-Outtake code for sample starts
             //Below code is to start outtake
-            if ( ((gamepad1.y && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) || sampleSensorState == ATE.SampleSensorState.BLUE || presampleSensorState == ATE.SampleSensorState.BLUE || (sampleSensorState != ATE.SampleSensorState.NONE && presampleSensorState != ATE.SampleSensorState.NONE )) && hSliderState == ATE.HorizontalSliderState.EXTENDED ) {
+            if ( ((gamepad1.y && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) || sampleSensorState == ATE.SampleSensorState.BLUE ) && hSliderState == ATE.HorizontalSliderState.EXTENDED ) {
+                setLedLights(true);
                 intakeLW.setDirection(Servo.Direction.FORWARD);
                 intakeRW.setDirection(Servo.Direction.REVERSE);
                 intakeLW.setPosition(0.9);
                 intakeRW.setPosition(0.9);
                 sampleSensorState = getSampleSensorState(sampleSensor);
                 intakeWrist.setPosition(ATC.intakeWristOuttakePose);
+                sleep(500);
+                setLedLights(false);
                 //Below if condition is to start intake
             }else if ((gamepad1.x && hSlider.getCurrentPosition() >= ATC.hSliderMinPose) && sampleSensorState == ATE.SampleSensorState.NONE && hSliderState == ATE.HorizontalSliderState.EXTENDED) {
                 intakeLW.setDirection(Servo.Direction.REVERSE);
@@ -280,6 +283,7 @@ public class TeleopRedAllianceStatesv2 extends LinearOpMode {
                 intakeLW.setPosition(0.9);
                 intakeRW.setPosition(0.9);
                 intakeWrist.setPosition(ATC.intakeWristIntakePose);
+                setLedLights(false);
             }else if ((sampleSensorState == ATE.SampleSensorState.YELLOW || sampleSensorState == ATE.SampleSensorState.RED ) && hSliderState == ATE.HorizontalSliderState.EXTENDED){
                 hSlider.setPower(-0.8);
                 intakeLW.setPosition(0.5);
@@ -299,7 +303,7 @@ public class TeleopRedAllianceStatesv2 extends LinearOpMode {
                 sampleSensorState = getSampleSensorState(sampleSensor);
             }
 
-            presampleSensorState = getPreSampleSensorState(presampleSensor);
+            //presampleSensorState = getPreSampleSensorState(presampleSensor);
 
 //Sample sensor code ends
             if(clawArmState == ATE.ClawArmState.PICK_INTAKE && clawWristState == ATE.ClawWristState.PICK_INTAKE && intakeWristState == ATE.IntakeWristState.PICK_INTAKE ) {
@@ -621,7 +625,7 @@ public class TeleopRedAllianceStatesv2 extends LinearOpMode {
             telemetry.addData("intakeWrist state", intakeWristState);
             telemetry.addData("intakeWheels state", intakeWheelsState);
             telemetry.addData("sample sensor state", sampleSensorState);
-            telemetry.addData("presample sensor state", presampleSensorState);
+            //telemetry.addData("presample sensor state", presampleSensorState);
             telemetry.addData("hSlider state", hSliderState);
             telemetry.addData("vSlider state", vSliderState);
             telemetry.addData("hslider pos", hSlider.getCurrentPosition());
@@ -644,11 +648,11 @@ public class TeleopRedAllianceStatesv2 extends LinearOpMode {
             double hue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) sampleSensor).getNormalizedColors().toColor()), 0));
             telemetry.addData("Sample Sensor Hue:",hue);
             telemetry.addData("Sample Sensor Distance:",sampdistance);
-            ((NormalizedColorSensor) presampleSensor).setGain(2);
-            double presampdistance = ((DistanceSensor) presampleSensor).getDistance(DistanceUnit.CM);
-            double prehue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) presampleSensor).getNormalizedColors().toColor()), 0));
-            telemetry.addData("PreSample Sensor Hue:",prehue);
-            telemetry.addData("PreSample Sensor Distance:",presampdistance);
+            //((NormalizedColorSensor) presampleSensor).setGain(2);
+            //double presampdistance = ((DistanceSensor) presampleSensor).getDistance(DistanceUnit.CM);
+            //double prehue = Double.parseDouble(JavaUtil.formatNumber(JavaUtil.colorToHue(((NormalizedColorSensor) presampleSensor).getNormalizedColors().toColor()), 0));
+            //telemetry.addData("PreSample Sensor Hue:",prehue);
+            //telemetry.addData("PreSample Sensor Distance:",presampdistance);
             telemetry.update();
             ///////Drive Code////////////
 
@@ -676,8 +680,13 @@ public class TeleopRedAllianceStatesv2 extends LinearOpMode {
 //Code to reset everything back to base position starts
 
             if(gamepad1.left_bumper && gamepad1.right_bumper) {
+
+
+
                 if (hSliderState == ATE.HorizontalSliderState.EXTENDED){
-                    setSlider(hSlider, 1400, hSliderVelocity);
+                    hSlider.setPower(0);
+                    setSlider(hSlider, 1200, hSliderVelocity);
+                    sleep(2000);
                 }
 
                 clawState = ATE.ClawState.CATCH;
@@ -722,9 +731,9 @@ public class TeleopRedAllianceStatesv2 extends LinearOpMode {
                 hSlider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 clawWrist.setPosition(clawWristDropPose);
                 clawArm.setPosition(clawArmDropPose);
-                sleep(500);
+                sleep(250);
                 claw.setPosition(clawReleasePose);
-                sleep(500);
+                sleep(250);
                 claw.setPosition(clawCatchTightPose);
                 clawArm.setPosition(clawArmBasePose);
                 clawWrist.setPosition(clawWristBasePose);
@@ -766,6 +775,7 @@ public class TeleopRedAllianceStatesv2 extends LinearOpMode {
         }
     }
     private ATE.SampleSensorState getPreSampleSensorState(ColorSensor colSensor){
+
         ((NormalizedColorSensor) colSensor).setGain(2);
         double distance = ((DistanceSensor) colSensor).getDistance(DistanceUnit.CM);
 
